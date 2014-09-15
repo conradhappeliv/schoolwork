@@ -1,11 +1,24 @@
+/* Conrad Appel
+ * MATH3316
+ * 9/16/14
+ */
+
 #include "mat.h"
 
 #include <iostream>
 
 double nest(Mat &a, double x) {
-    double sum = a(a.Cols() - 1);
-    for(unsigned int i = a.Cols() - 2; i > 0; i--) {
-        sum = a(i) + x*sum;
+    /*double sum = 0;
+    for(int i = a.Cols()-1; i > 0; i--) {
+        sum += a(i);
+        sum *= x;
     }
-    return sum;
+    sum += a(0);
+    return sum;*/
+    int n = a.Cols()-1;
+    double p = a(n);
+    for(int i = n - 1; i >= 0; i--) {
+        p = a(i) + x*p;
+    }
+    return p;
 }

@@ -7,4 +7,7 @@ SOURCES += \
     nest.cpp \
     proj1_a.cpp \
     mat.cpp \
-    mat.h
+    mat.h \
+    proj1_b.cpp
+
+OTHER_FILES +=

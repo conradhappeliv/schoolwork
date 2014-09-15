@@ -1,3 +1,8 @@
+/* Conrad Appel
+ * MATH3316
+ * 9/16/14
+ */
+
 #include "nest.cpp"
 #include "mat.h"
 
@@ -7,8 +12,7 @@
 
 using namespace std;
 
-int main()
-{
+int main_a() {
     // -4, -3.99, -3.98, ..., 3.98, 3.99, 4
     Mat z = Linspace(-4, 4, 801);
 
@@ -19,14 +23,14 @@ int main()
     for(int i = 0; i < 801; i++) { p5Res(i) = nest(p5Coeffs, z(i)); }
 
     // Compute the vector p9 as the value of p 9 (x) for all x ∈ z.
-    double p9Data[] = {0, 1, 0, -1.0/6, 0, 1.0/120, 0, -1.0/5040, 0, 1.0/362880};
-    Mat p9Coeffs = Mat(1, 9, p9Data);
+    double p9Data[] = {0, 1, 0, -1.0/6, 0.0, 1.0/120.0, 0.0, -1.0/5040.0, 0.0, 1.0/362880.0};
+    Mat p9Coeffs = Mat(1, 10, p9Data);
     Mat p9Res = Mat(1, 801);
     for(int i = 0; i < 801; i++) { p9Res(i) = nest(p9Coeffs, z(i)); }
 
     // Compute the vector p13 as the value of p 13 (x) for all x ∈ z.
     double p13Data[] = {0, 1, 0, -1.0/6, 0, 1.0/120, 0, -1.0/5040, 0, 1.0/362880, 0, -1.0/39916800, 0, 1.0/6227020800};
-    Mat p13Coeffs = Mat(1, 13, p13Data);
+    Mat p13Coeffs = Mat(1, 14, p13Data);
     Mat p13Res = Mat(1, 801);
     for(int i = 0; i < 801; i++) { p13Res(i) = nest(p13Coeffs, z(i)); }
 
@@ -46,14 +50,19 @@ int main()
     Mat err13 = Mat(1, 801);
     for(int i = 0; i < 801; i++) { err13(i) = abs(fRes(i) - p13Res(i)); }
 
-    z.Write("z.txt");
-    p5Res.Write("p5.txt");
-    p9Res.Write("p9.txt");
-    p13Res.Write("p13.txt");
-    fRes.Write("f.txt");
-    err5.Write("err5.txt");
-    err9.Write("err9.txt");
-    err13.Write("err13.txt");
+    z.Write("../z.txt");
+    p5Res.Write("../p5.txt");
+    p9Res.Write("../p9.txt");
+    p13Res.Write("../p13.txt");
+    fRes.Write("../f.txt");
+    err5.Write("../err5.txt");
+    err9.Write("../err9.txt");
+    err13.Write("../err13.txt");
 
     return 0;
+}
+
+int main()
+{
+    return main_a();
 }

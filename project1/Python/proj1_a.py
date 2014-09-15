@@ -1,6 +1,6 @@
 # Conrad Appel
-# MATH3316, Fall 2014
-# Due Sep. 16, 2014
+# MATH 3316
+# 9/16/14
 
 import numpy
 from pylab import *
