@@ -12,7 +12,7 @@
 
 using namespace std;
 
-int main_a() {
+int main() {
     // -4, -3.99, -3.98, ..., 3.98, 3.99, 4
     Mat z = Linspace(-4, 4, 801);
 
@@ -60,9 +60,4 @@ int main_a() {
     err13.Write("../err13.txt");
 
     return 0;
-}
-
-int main()
-{
-    return main_a();
 }

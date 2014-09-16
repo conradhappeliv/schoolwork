@@ -14,10 +14,6 @@ using namespace std;
 // f'(5) = (-2)*5^(-3) = -0.016
 const double fPrime5 = -0.016;
 
-// f'' = 6*x^-4
-// f''(5) = .0096
-const double fDoublePrime5 = .0096;
-
 int main() {
     // δ−f(5)
     Mat h = Mat(1, 52);

@@ -20,6 +20,7 @@ legend(loc='upper left')
 ylabel('sin(x)')
 xlabel('x')
 title('sin(x) approximated with Taylor polynomials')
+savefig('../sinx.png', bbox_inches='tight')
 
 figure(2)
 semilogy(x, data['err5'], label='err(p5)')
@@ -29,6 +30,7 @@ legend(loc='upper center')
 ylabel('err(x)')
 xlabel('x')
 title('Errors in Taylor polynomial approximations of sin(x)')
+savefig('../sinxerrs.png', bbox_inches='tight')
 
 show()
 
