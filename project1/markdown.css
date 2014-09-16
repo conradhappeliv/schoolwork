@@ -42,7 +42,7 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
     color: #000000;
-    font-size: 28px;
+    font-size: 26px;
 }
 
 h2 {
@@ -77,13 +77,20 @@ hr {
 }
 
 p, blockquote, ul, ol, dl, li, table, pre {
-    margin: 15px 0;
+    margin: 10px 0;
 }
 
-code, pre {
+pre {
+    border:none;
+    background-color:white;
+}
+
+code, pre pre {
+    border: 1px solid #777777;
     border-radius: 3px;
-    background-color: #F8F8F8;
+    background-color: #EAEAEA;
     color: inherit;
+    margin:0;
 }
 
 code {
@@ -93,10 +100,9 @@ code {
 }
 
 pre {
-    border: 1px solid #CCCCCC;
     line-height: 1.25em;
     overflow: auto;
-    padding: 6px 10px;
+    padding: 3px 10px;
 }
 
 pre > code {
