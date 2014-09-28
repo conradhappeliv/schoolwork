@@ -1,0 +1,6 @@
+*.out
+Makefile (copy)
+*.gch
+*.pro.user
+Project2
+build-project2-Desktop-*
