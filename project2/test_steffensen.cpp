@@ -1,3 +1,8 @@
+/* Conrad Appel
+ * MATH3316
+ * Oct 7 2014
+ */
+
 #include "steffensen.cpp"
 
 #include <iostream>
@@ -8,7 +13,7 @@ double f(const double, void*);
 
 int main() {
     int guesses[3] = { -1, 2, 3 };
-    double tols[3] = { 10e-3, 10e-7, 10e-11 };
+    double tols[3] = { 10e-4, 10e-8, 10e-12 };
     int maxit = 20;
 
     for(unsigned int i = 0; i < 3; i++) {
@@ -16,11 +21,8 @@ int main() {
             int guess = guesses[i];
             double tol = tols[j];
             double res = steffensen(f, guess, maxit, tol, true, NULL);
-            cout << res;
         }
     }
-
-    cout << "steff" << endl;
     return 0;
 }
 

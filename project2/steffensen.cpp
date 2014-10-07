@@ -1,3 +1,8 @@
+/* Conrad Appel
+ * MATH3316
+ * Oct 7 2014
+ */
+
 #include "mat.h"
 
 #include <iostream>
@@ -12,17 +17,23 @@ double steffensen(double (*f)(const double, void *data), double x, int maxit, do
     double res = x;
     for(unsigned int i = 0; i < maxit; i++) {
         prev_res = res;
+        double f_of_x = f(res, data);
 
-        double f_of_x = f(res, NULL);
-        double df_of_x = (f_of_x - f(x - f_of_x, NULL)) / f_of_x;
+        // find current df value using Steffensen's
+        double df_of_x = (f_of_x - f(res - f_of_x, data))/f_of_x;
 
         // x(n+1) = x(n) - f(x(n))/f'(x(n))
         res = res - f_of_x/df_of_x;
 
+        // residual after calculating next val
+        f_of_x = std::abs(f(res, data));
+
+        // |h|
         double sol_update = std::abs(res - prev_res);
 
+
         if(show_iterates)
-            std::cout << "it" << i+1 << " ; guess " << res  << " ; sol'n update "  << sol_update << " ; f(x) = " << f_of_x << std::endl;
+            std::cout << "it" << i << " ; guess " << res  << " ; sol'n update "  << sol_update << " ; f(x) = " << f_of_x << std::endl;
 
         if(sol_update <= tol)
             break;
