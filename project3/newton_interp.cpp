@@ -16,6 +16,7 @@ int newton_coeffs(Mat& x, Mat& y, Mat& c) {
             c(j) = (c(j) - c(j-1))/(x(j) - x(j-i));
         }
     }
+    return 0;
 }
 
 double newton_eval(Mat& x, Mat& c, double z) {
