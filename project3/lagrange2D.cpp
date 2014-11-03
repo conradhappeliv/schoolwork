@@ -1,3 +1,7 @@
+// Conrad Appel
+// MATH 3316
+// Nov 4 2014
+
 #include "mat.h"
 #include "lagrange.cpp"
 
