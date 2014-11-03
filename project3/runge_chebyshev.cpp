@@ -8,13 +8,19 @@
 #include "mat.h"
 #include "lagrange2D.cpp"
 
-double f(double x, double y) {
-    return 1.0/(1.0 + x*x + y*y);
+double f(int x, int y) {
+    return 1.0/(1 + std::pow(x, 2) + std::pow(y, 2));
+}
+
+double chebNode(unsigned int n, int i) {
+    return n*std::cos((2*i + 1) * PI / (2*n + 2));
 }
 
 void computeWithNodes(unsigned int n, unsigned int m, std::string filename) {
-    Mat x = Linspace(-6, 6, m+1);
-    Mat y = Linspace(-6, 6, n+1);
+    Mat x(m+1);
+    for(unsigned int i = 0; i < x.Size(); i++)
+        x(i) = chebNode(m+1, i);
+    Mat y = x;
 
     Mat f_eval(m+1, n+1);
     for(unsigned int i = 0; i < m; i++) {
@@ -39,20 +45,8 @@ void computeWithNodes(unsigned int n, unsigned int m, std::string filename) {
 }
 
 int main() {
-    computeWithNodes(8, 8, "./p8_reg.txt");
-    computeWithNodes(16, 16, "./p16_reg.txt");
-
-    Mat avals = Linspace(-6, 6, 101);
-    Mat bvals = Linspace(-6, 6, 201);
-
-    Mat runge(101, 201);
-    for(unsigned int i = 0; i < avals.Size(); i++) {
-        for(unsigned int j = 0; j < bvals.Size(); j++) {
-            runge(i, j) = f(avals(i), bvals(j));
-        }
-    }
-
-    runge.Write("./runge.txt");
+    computeWithNodes(8, 8, "./p8_cheb.txt");
+    computeWithNodes(16, 16, "./p16_cheb.txt");
 
     return 0;
 }
