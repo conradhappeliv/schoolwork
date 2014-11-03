@@ -7,7 +7,9 @@ SOURCES += / \
     newton_interp.cpp \
     test_newton.cpp \
     compare.cpp \
-    lagrange2D.cpp
+    lagrange2D.cpp \
+    runge_regular.cpp \
+    runge_chebyshev.cpp
     lagrange.cpp
     mat.cpp
 
