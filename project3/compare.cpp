@@ -14,9 +14,9 @@ void testLagrange(unsigned int n, Mat& x, Mat& y, Mat& z) {
 
 void testNewton(unsigned int n, Mat& x, Mat& y, Mat& z) {
     Mat p(n);
+    Mat c(n+1);
+    newton_coeffs(x, y, c);
     for(int i = 0; i < n; i++) {
-        Mat c(n+1);
-        newton_coeffs(x, y, c);
         p(i) = newton_eval(x, c, z(i));
     }
 }

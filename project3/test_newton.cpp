@@ -8,7 +8,7 @@ double f(const double x) {
     return exp(-x*x);
 }
 
-void testWithNNodes(int n) {
+void testWithNNodes(int n, double range) {
     n -= 1;
     Mat x = Linspace(-2.0, 2.0, n+1);
     Mat y(n+1);
@@ -16,12 +16,12 @@ void testWithNNodes(int n) {
         y(i) = f(x(i));
     }
     double dx = 4.0/n;
-    Mat z = Linspace(-2.0+dx/2.0, 2.0-dx/2.0, n);
+    Mat z = Linspace(-range+dx/2.0, range-dx/2.0, n);
 
     Mat p(n);
+    Mat c(n+1);
+    newton_coeffs(x, y, c);
     for(int i = 0; i < n; i++) {
-        Mat c(n+1);
-        newton_coeffs(x, y, c);
         p(i) = newton_eval(x, c, z(i));
     }
 
@@ -36,7 +36,7 @@ void testWithNNodes(int n) {
 
 int main()
 {
-    testWithNNodes(6);
-    testWithNNodes(12);
+    testWithNNodes(6, 2.0);
+    testWithNNodes(12, 1.0);
     return 0;
 }
