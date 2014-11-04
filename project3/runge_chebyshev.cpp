@@ -12,19 +12,21 @@ double f(int x, int y) {
     return 1.0/(1 + std::pow(x, 2) + std::pow(y, 2));
 }
 
-double chebNode(unsigned int n, int i) {
-    return n*std::cos((2*i + 1) * PI / (2*n + 2));
+double chebNode(double n, double i, double m) {
+    return n*std::cos((2*i + 1) * PI / (2*m + 2));
 }
 
 void computeWithNodes(unsigned int n, unsigned int m, std::string filename) {
     Mat x(m+1);
-    for(unsigned int i = 0; i < x.Size(); i++)
-        x(i) = chebNode(m+1, i);
-    Mat y = x;
+    Mat y(n+1);
+    for(unsigned int i = 0; i < x.Size(); i++) {
+        x(i) = chebNode(6, i, m);
+        y(i) = chebNode(6, i, m);
+    }
 
     Mat f_eval(m+1, n+1);
-    for(unsigned int i = 0; i < m; i++) {
-        for(unsigned int j = 0; j < n; j++) {
+    for(unsigned int i = 0; i < x.Size(); i++) {
+        for(unsigned int j = 0; j < y.Size(); j++) {
             f_eval(i, j) = f(x(i), y(j));
         }
     }

@@ -7,8 +7,8 @@
 
 double lagrange2D(Mat& x, Mat& y, Mat& f, double a, double b) {
     double sum = 0;
-    for(int i = 0; i < x.Cols(); i++) {
-        for(int j = 0; j < y.Cols(); j++) {
+    for(int i = 0; i < x.Size(); i++) {
+        for(int j = 0; j < y.Size(); j++) {
             sum += f(i, j) * lagrange_basis(x, i, a) * lagrange_basis(y, j, b);
         }
     }

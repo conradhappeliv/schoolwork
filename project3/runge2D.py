@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Conrad Appel
 # MATH3316
 # Nov 4 2014
