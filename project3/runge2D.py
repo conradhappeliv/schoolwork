@@ -18,6 +18,7 @@ err_p16_reg = ndarray(shape=(101, 201))
 err_p8_cheb = ndarray(shape=(101, 201))
 err_p16_cheb = ndarray(shape=(101, 201))
 
+# error calculations
 for i in range(101):
     for j in range(201):
         err_p8_reg[i, j] = abs(f[i, j] - p8_reg[i, j])

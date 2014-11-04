@@ -8,10 +8,12 @@
 #include "newton_interp.cpp"
 #include "mat.h"
 
+// f(x) = e^(-x^2)
 double f(const double x) {
     return exp(-x*x);
 }
 
+// used to reuse code for 8 and 16 nodes
 void testWithNNodes(int n, double range) {
     n -= 1;
     Mat x = Linspace(-2.0, 2.0, n+1);
@@ -20,12 +22,13 @@ void testWithNNodes(int n, double range) {
         y(i) = f(x(i));
     }
     double dx = 4.0/n;
-    Mat z = Linspace(-range+dx/2.0, range-dx/2.0, n);
+    Mat z = Linspace(-range+dx/2.0, range-dx/2.0, n); // evaluation points
 
-    Mat p(n);
-    Mat c(n+1);
-    newton_coeffs(x, y, c);
+    Mat p(n); // results of interpolation
+    Mat c(n+1); // coefficients
+    newton_coeffs(x, y, c); // only need to calculate the coefficients once
     for(int i = 0; i < n; i++) {
+        // calculate Newton interpolant at each evaluation point
         p(i) = newton_eval(x, c, z(i));
     }
 

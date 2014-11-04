@@ -23,6 +23,7 @@ int newton_coeffs(Mat& x, Mat& y, Mat& c) {
     return 0;
 }
 
+// evaluates Newton interpolation polynomial with nodes x, coefficients c, at point z
 double newton_eval(Mat& x, Mat& c, double z) {
     unsigned int n = x.Cols();
     double sum = 0;
