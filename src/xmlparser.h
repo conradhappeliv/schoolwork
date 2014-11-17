@@ -1,19 +1,26 @@
 #ifndef XMLPARSER_H
 #define XMLPARSER_H
 
+#include <stack>
+#include <mutex>
 #include <libxml++/libxml++.h>
 #include <libxml++/parsers/textreader.h>
 
-class XMLParser
-{
+#include "Page.h"
+#include "processor.h"
+
+class XMLParser {
 public:
     XMLParser(std::string);
     void parse();
     bool complete();
+    void setProcessor(Processor&);
 private:
     std::string filename;
     int count = 0;
     bool finished = false;
+    std::mutex TBPLock;
+    std::stack<Page> toBeProcessed;
 };
 
 #endif // XMLPARSER_H

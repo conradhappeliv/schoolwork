@@ -3,7 +3,8 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
-QMAKE_CXXFLAGS += -lncurses
+QMAKE_CXXFLAGS += -pthread
+QMAKE_LFLAGS += -pthread
 INCLUDEPATH +=/usr/include/libxml2 \
     /usr/include/glibmm-2.4 \
     /usr/lib/x86_64-linux-gnu/glibmm-2.4/include \
@@ -23,10 +24,13 @@ LIBS += -lxml++-2.6 \
 SOURCES += src/main.cpp \
     src/HashTable.cpp \
     src/xmlparser.cpp \
-    lib/getopt_pp.cpp
+    lib/getopt_pp.cpp \
+    src/processor.cpp \
+    lib/porter2_stemmer.cpp
 
 HEADERS += src/index.h \
-    src/HashTable.h \
-    src/saxparse.h \
     src/xmlparser.h \
-    lib/getopt_pp.h
+    lib/getopt_pp.h \
+    src/processor.h \
+    src/Page.h \
+    lib/porter2_stemmer.h
