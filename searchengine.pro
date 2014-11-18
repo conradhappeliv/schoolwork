@@ -25,12 +25,11 @@ SOURCES += src/main.cpp \
     src/HashTable.cpp \
     src/xmlparser.cpp \
     lib/getopt_pp.cpp \
-    src/processor.cpp \
-    lib/porter2_stemmer.cpp
+    src/processor.cpp
 
 HEADERS += src/index.h \
     src/xmlparser.h \
     lib/getopt_pp.h \
     src/processor.h \
     src/Page.h \
-    lib/porter2_stemmer.h
+    lib/c_threadsafe_porter.h
