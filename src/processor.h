@@ -11,11 +11,9 @@
 class Processor {
 public:
     Processor();
-    void process(std::stack<Page>&, std::mutex&, bool&); // TODO: this bool reference is probably bad practice lol
+    static void process(std::stack<Page>&, std::mutex&, bool&); // TODO: this bool reference is probably bad practice lol
     static bool isStopWord(std::string);
 private:
-
-
 };
 
 #endif // PROCESSOR_H

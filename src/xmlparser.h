@@ -14,7 +14,7 @@ public:
     XMLParser(std::string);
     void parse();
     bool complete();
-    void setProcessor(Processor&);
+    void beginProcessing();
 private:
     std::string filename;
     int count = 0;

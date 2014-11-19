@@ -1,11 +1,9 @@
 #include <iostream>
 #include <thread>
-#include <stack>
 
 #include "lib/getopt_pp.h"
 #include "src/xmlparser.h"
 #include "src/index.h"
-#include "src/processor.h"
 
 enum modes {
     MAINTENANCE,
@@ -43,7 +41,7 @@ int main(int argc, char* argv[])
                 parser.parse();
             });
             threads[1] = std::thread([&]() {
-                parser.setProcessor(processor);
+                parser.beginProcessing();
             });
             threads[0].join();
             threads[1].join();

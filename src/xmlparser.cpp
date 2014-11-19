@@ -48,6 +48,6 @@ bool XMLParser::complete() {
     return finished;
 }
 
-void XMLParser::setProcessor(Processor& processor) {
-    processor.process(toBeProcessed, TBPLock, finished);
+void XMLParser::beginProcessing() {
+    Processor::process(toBeProcessed, TBPLock, finished);
 }
