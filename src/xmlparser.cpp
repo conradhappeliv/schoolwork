@@ -1,3 +1,5 @@
+// Owner: Conrad Appel
+
 #include <iostream>
 #include <stack>
 #include <mutex>

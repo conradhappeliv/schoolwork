@@ -1,3 +1,5 @@
+// Owner: Conrad Appel
+
 #include <stack>
 #include <iostream>
 #include <sstream>
@@ -45,9 +47,7 @@ void threadProcess(std::stack<Page>* toBeProcessed, std::mutex* TBPLock, bool* c
 
                 // calculate frequencies
                 if(frequencies.count(word) > 0) frequencies[word] = frequencies[word] + 1;
-                else {
-                    frequencies[word] = 1;
-                }
+                else frequencies[word] = 1;
                 for(auto i = frequencies.begin(); i != frequencies.end(); i++) {
                     std::cout << i->first << ": " << i->second << std::endl;
                 }

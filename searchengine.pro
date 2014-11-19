@@ -22,7 +22,6 @@ LIBS += -lxml++-2.6 \
     -lsigc-2.0
 
 SOURCES += src/main.cpp \
-    src/HashTable.cpp \
     src/xmlparser.cpp \
     lib/getopt_pp.cpp \
     src/processor.cpp

@@ -1,3 +1,5 @@
+// Owner: Conrad Appel
+
 #ifndef XMLPARSER_H
 #define XMLPARSER_H
 
