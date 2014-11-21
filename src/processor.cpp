@@ -16,12 +16,12 @@ const static std::unordered_set<std::string> stopWords = {"a","able","about","ab
 
 Processor::Processor() {}
 
-void threadProcess(std::stack<Page>* toBeProcessed, std::mutex* TBPLock, bool* completedParsing) {
-    struct stemmer * z = create_stemmer();
+void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const bool* completedParsing, Index* index) {
+    struct stemmer* z = create_stemmer();
     while(!toBeProcessed->empty() || !*completedParsing) {
         if(!toBeProcessed->empty()) {
             TBPLock->lock();
-            Page page;
+            Page* page;
             if(!toBeProcessed->empty()) page = toBeProcessed->top();
             else {
                 TBPLock->unlock();
@@ -29,7 +29,7 @@ void threadProcess(std::stack<Page>* toBeProcessed, std::mutex* TBPLock, bool* c
             }
             toBeProcessed->pop();
             TBPLock->unlock();
-            std::istringstream stream(page.body);
+            std::istringstream stream(page->body);
             std::string word;
             std::unordered_map<std::string, unsigned int> frequencies;
             while(stream >> word) {
@@ -49,22 +49,25 @@ void threadProcess(std::stack<Page>* toBeProcessed, std::mutex* TBPLock, bool* c
                 if(frequencies.count(word) > 0) frequencies[word] = frequencies[word] + 1;
                 else frequencies[word] = 1;
                 for(auto i = frequencies.begin(); i != frequencies.end(); i++) {
-                    std::cout << i->first << ": " << i->second << std::endl;
+                    //index->add(page->id, i->first, i->second);
+                    //std::cout << i->first << ": " << i->second << std::endl;
                 }
             }
-            //std::cout << "finished page " << page.id << std::endl;
+            index->addDoc(page->id, page);
+            if(page->id % 5 == 0) std::cout << "finished page " << page->id << std::endl;
         }
     }
     free_stemmer(z);
 }
 
-void Processor::process(std::stack<Page>& toBeProcessed, std::mutex& TBPLock, bool& completedParsing) {
+void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, const bool* completedParsing, Index* index) {
     std::cout << "processing begins" << std::endl;
-    std::thread threads[4];
-    for(unsigned int i = 0; i < 4; i++) {
-        threads[i] = std::thread(threadProcess, &toBeProcessed, &TBPLock, &completedParsing);
+    unsigned int numOfThreads = 30;
+    std::thread threads[numOfThreads];
+    for(unsigned int i = 0; i < numOfThreads; i++) {
+        threads[i] = std::thread(threadProcess, &toBeProcessed, &TBPLock, completedParsing, index);
     }
-    for(unsigned int i = 0; i < 4; i++) {
+    for(unsigned int i = 0; i < numOfThreads; i++) {
         threads[i].join();
     }
     std::cout << "processing complete\n";

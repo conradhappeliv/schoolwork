@@ -1,22 +1,17 @@
+// Owner: Conrad Appel
+
 #ifndef INDEX_H
 #define INDEX_H
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <list>
+
+#include "Page.h"
 
 // abstract interface for index
-class Index
-{
-public:
-    Index(std::string filen):filename(filen) {}
-    virtual void add(std::string, unsigned int, std::string) = 0;
-    virtual void save() = 0;
-    virtual void load() = 0;
-    virtual void clear() = 0;
-
-    // we can use a hashtable for each of these and actually implement them in this parent class
-    std::string IDtoTitle(unsigned int);
-    std::string IDtoText(unsigned int);
+class Index {
 protected:
     std::string filename;
     struct entry {
@@ -26,8 +21,29 @@ protected:
         };
         std::string keyword;
         std::vector<doc> documents;
-        double idf;
+        double idf = 0;
     };
+public:
+    Index(std::string filen):filename(filen) {
+        pages.reserve(256279);
+    }
+    virtual void add(const unsigned int, const std::string, const unsigned int) = 0;
+    void addDoc(const unsigned int, Page*);
+    virtual void save() = 0;
+    virtual void load() = 0;
+    virtual void clear() = 0;
+
+    // we can use a hashtable for each of these and actually implement them in this parent class
+    std::string IDtoTitle(const unsigned int);
+    std::string IDtoText(const unsigned int);
+private:
+    struct pageContents {
+        pageContents() {}
+        pageContents(std::string t, std::string b):title(t),body(b) {}
+        std::string title;
+        std::string body;
+    };
+    std::unordered_map<unsigned int, Page*> pages;
 };
 
 #endif // INDEX_H

@@ -6,6 +6,7 @@
 #include "lib/getopt_pp.h"
 #include "src/xmlparser.h"
 #include "src/index.h"
+#include "src/listindex.h"
 
 enum modes {
     MAINTENANCE,
@@ -36,8 +37,8 @@ int main(int argc, char* argv[])
         std::string filepath;
         if(ops >> GetOpt::Option('f', "filename", filepath)) { // add file to index
             std::thread threads[2];
-            XMLParser parser(filepath);
-            Processor processor;
+            Index* index = new ListIndex("./default.index");
+            XMLParser parser(filepath, index);
 
             threads[0] = std::thread([&]() {
                 parser.parse();
@@ -47,6 +48,7 @@ int main(int argc, char* argv[])
             });
             threads[0].join();
             threads[1].join();
+
         } else if(ops >> GetOpt::OptionPresent('c', "clear")){ // clear index
 
         } else { // show help relevant to maintenance mode
