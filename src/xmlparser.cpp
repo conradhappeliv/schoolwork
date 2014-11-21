@@ -10,8 +10,9 @@
 #include "xmlparser.h"
 #include "processor.h"
 
-XMLParser::XMLParser(std::string filen) {
+XMLParser::XMLParser(std::string filen, Index* inde) {
     filename = filen;
+    index = inde;
 }
 
 void XMLParser::parse() {
@@ -22,6 +23,8 @@ void XMLParser::parse() {
             unsigned int id;
             std::string title;
             std::string text;
+            std::string timestamp;
+            std::string username;
 
             // TODO: CLEAN THIS SECTION UP WHEN SURE IT'S WORKING
             // is the data always in order??? we must be careful.
@@ -33,12 +36,23 @@ void XMLParser::parse() {
             while(reader.get_name() != "id" && stillReading);
             id = std::atoi(reader.read_string().raw().c_str());
             do stillReading = reader.read();
+            while(reader.get_name() != "timestamp" && stillReading);
+            timestamp = reader.read_string();
+            do stillReading = reader.read();
+            while(reader.get_name() != "username" && stillReading);
+            username = reader.read_string();
+            do stillReading = reader.read();
             while(reader.get_name() != "text" && stillReading);
             text = reader.read_string();
 
-            //if(stillReading) std::cout << id << ": " << title << " - text here" << std::endl;
+            Page* p = new Page;
+            p->body = text;
+            p->date = timestamp;
+            p->id = id;
+            p->title = title;
+            p->username = username;
             TBPLock.lock();
-            toBeProcessed.push(Page(id, title, text));
+            toBeProcessed.push(p);
             TBPLock.unlock();
         }
     }
@@ -51,5 +65,6 @@ bool XMLParser::complete() {
 }
 
 void XMLParser::beginProcessing() {
-    Processor::process(toBeProcessed, TBPLock, finished);
+    while(finished);
+    Processor::process(toBeProcessed, TBPLock, &finished, index);
 }

@@ -13,16 +13,17 @@
 
 class XMLParser {
 public:
-    XMLParser(std::string);
+    XMLParser(std::string, Index*);
     void parse();
     bool complete();
     void beginProcessing();
 private:
     std::string filename;
+    Index* index;
     int count = 0;
     bool finished = false;
     std::mutex TBPLock;
-    std::stack<Page> toBeProcessed;
+    std::stack<Page*> toBeProcessed;
 };
 
 #endif // XMLPARSER_H
