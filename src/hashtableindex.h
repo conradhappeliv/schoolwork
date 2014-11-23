@@ -12,14 +12,14 @@ class HashTableIndex
 public:
     HashTableIndex();
     ~HashTableIndex();
-    int get(K key);
+    V get(K key);
     void insert(K key, V value);
     void remove(K key);
     void resize();
-    HashEntry* find(K keyword); // TODO: to be implemented
+    HashEntry<K, V>* find(K keyword); // TODO: to be implemented
 
 private:
-    HashEntry **table;
+    HashEntry<K, V> **table;
 
     float threshold;
     int tableSize;

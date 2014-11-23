@@ -2,12 +2,10 @@
 
 #ifndef QUERYPROCESSOR_H
 #define QUERYPROCESSOR_H
-#include "hashentry.h"
-#include "hashtableindex.h"
-#include "avltreeindex.h"
-#include <vector>
 
-template <typename K, typename V>
+#include <vector>
+#include <string>
+
 class queryprocessor
 {
 public:

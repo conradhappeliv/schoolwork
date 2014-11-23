@@ -30,7 +30,7 @@ void HashEntry<K,V>::setValue(V value)
 }
 
 template <typename K, typename V>
-HashEntry* HashEntry<K,V>::getNext()
+HashEntry<K, V>* HashEntry<K,V>::getNext()
 {
     return next;
 }
