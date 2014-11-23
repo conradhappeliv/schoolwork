@@ -42,7 +42,8 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
 
                 // stem words
                 char* word_c = (char*)word.c_str();
-                stem(z, word_c, word.length());
+                unsigned int x = stem(z, word_c, word.length() - 1);
+                word[x+1] = '\0';
                 word = word_c;
 
                 // calculate frequencies
