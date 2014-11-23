@@ -15,7 +15,7 @@ enum modes {
     STRESS,
     HELP
 };
-enum indextype {
+enum indextypes {
     AVLTREE,
     HASHTABLE
 };
@@ -60,17 +60,17 @@ int main(int argc, char* argv[])
         int indexType = AVLTREE; // default index type
         if(ops >> GetOpt::OptionPresent('a', "avltree")) indexType = AVLTREE;
         else if(ops >> GetOpt::OptionPresent('t', "hashtable")) indexType = HASHTABLE;
-        while(true) { // enter a loop to allow the user to search index
+        /*while(true) { // enter a loop to allow the user to search index
             std::cout << "infinite loop";
-            if (indextype == AVLTREE) {
+            if (indexType == AVLTREE) {
                 queryproc = new queryprocessor(AVLTREE);
-            } else if (indextype == HASHTABLE) {
+            } else if (indexType == HASHTABLE) {
                 queryproc = new queryprocessor(HASHTABLE);
             } else {
                 std::cout << "invalid data structure implementation called" << std::endl;
                 break;
             }
-        }
+        }*/
     } else if(mode == STRESS) {
         std::cout << "~~~ STRESS TEST MODE ~~~" << std::endl;
         std::string filepath;

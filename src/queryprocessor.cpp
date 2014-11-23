@@ -59,9 +59,7 @@ void queryprocessor::processQuery()
     }
 }
 
-template <typename K, typename V>
-void queryprocessor<K,V>::search(string term, string delim)
-{
+void queryprocessor::search(string term, string delim) {
     if (mode == AVLTREE) { // working with AVL Tree nodes
         // look for avl node with matching term and keyword
         /*
