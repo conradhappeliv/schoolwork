@@ -1,3 +1,5 @@
+// Owner: Edward Li
+
 #ifndef AVLTREEINDEX_H
 #define AVLTREEINDEX_H
 #include <string>
@@ -22,6 +24,7 @@ private:
     AVLTreeNode *root;
     void clear(AVLTreeNode *n);
     void print(AVLTreeNode *n);
+    AVLTreeNode* find(std::string keyword); // TODO: to be implemented
 
 public:
     AVLTreeIndex();

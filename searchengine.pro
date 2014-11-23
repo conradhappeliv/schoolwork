@@ -22,13 +22,22 @@ LIBS += -lxml++-2.6 \
     -lsigc-2.0
 
 SOURCES += src/main.cpp \
-    src/xmlparser.cpp \
     lib/getopt_pp.cpp \
-    src/processor.cpp
+    src/index.cpp\
+    src/xmlparser.cpp\
+    src/processor.cpp\
+    src/hashtableindex.cpp\
+    src/avltreeindex.cpp\
+    src/hashentry.cpp \
+    src/queryprocessor.cpp
 
 HEADERS += src/index.h \
-    src/xmlparser.h \
-    lib/getopt_pp.h \
-    src/processor.h \
-    src/Page.h \
-    lib/c_threadsafe_porter.h
+    lib/getopt_pp.h\
+    lib/c_threadsafe_porter.h \
+    src/xmlparser.h\
+    src/processor.h\
+    src/Page.h\
+    src/hashtableindex.h\
+    src/avltreeindex.h\
+    src/hashentry.h \
+    src/queryprocessor.h

@@ -1,4 +1,6 @@
-#include "HashEntry.h"
+// Owner: Edward Li
+
+#include "hashentry.h"
 
 template <typename K, typename V>
 HashEntry<K,V>::HashEntry(K key, V value)

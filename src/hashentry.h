@@ -1,7 +1,8 @@
+// Owner: Edward Li
+
 #ifndef HASHENTRY_H
 #define HASHENTRY_H
 #include <string>
-//#include <iostream>
 
 template <typename K, typename V>
 class HashEntry

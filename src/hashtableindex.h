@@ -1,6 +1,8 @@
+// Owner: Edward Li
+
 #ifndef HASHTABLEINDEX_H
 #define HASHTABLEINDEX_H
-#include "HashEntry.h"
+#include "hashentry.h"
 
 const int TABLE_SIZE = 1000;
 
@@ -14,7 +16,7 @@ public:
     void insert(K key, V value);
     void remove(K key);
     void resize();
-    V find(K key);
+    HashEntry* find(K keyword); // TODO: to be implemented
 
 private:
     HashEntry **table;

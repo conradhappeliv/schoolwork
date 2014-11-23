@@ -1,5 +1,6 @@
+// Owner: Edward Li
+
 #include "hashtableindex.h"
-#include "HashEntry.h"
 
 // constructor
 template <typename K, typename V>
@@ -18,14 +19,11 @@ HashTableIndex<K,V>::HashTableIndex()
 template <typename K, typename V>
 HashTableIndex<K,V>::~HashTableIndex()
 {
-    for (int i = 0; i < TABLE_SIZE; i++)
-    {
-        if (table[i] != NULL)
-        {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        if (table[i] != NULL) {
             HashEntry *prev = NULL;
             HashEntry *entry = table[i];
-            while (entry != NULL)
-            {
+            while (entry != NULL) {
                 prev = entry;
                 entry = entry->getNext();
                 delete prev;
@@ -47,14 +45,11 @@ void HashTableIndex<K,V>::resize()
     table = new HashEntry*[tableSize];
     for (int i = 0; i < tableSize; i++) table[i] = NULL;
     currSize = 0;
-    for (int j = 0; j < oldSize; j++)
-    {
-        if (oldTable[j] != NULL)
-        {
+    for (int j = 0; j < oldSize; j++) {
+        if (oldTable[j] != NULL) {
             HashEntry *oldEntry;
             HashEntry *entry = oldTable[j];
-            while (entry != NULL)
-            {
+            while (entry != NULL) {
                 insert(entry->getKey(), entry->getValue());
                 oldEntry = entry;
                 entry = entry->getNext();
@@ -70,8 +65,7 @@ V HashTableIndex<K,V>::get(K key)
 {
     int hash = (key % TABLE_SIZE);
     if (table[hash] == NULL) return -1;
-    else
-    {
+    else {
         HashEntry *entry = table[hash];
         while (entry != NULL && entry->getKey() != key) entry = entry->getNext();
         if (entry == NULL) return -1;
@@ -87,14 +81,11 @@ void HashTableIndex<K,V>::insert(K key, V value)
     {
         table[hash] = new HashEntry(key, value);
         currSize++;
-    }
-    else
-    {
+    } else {
         HashEntry *entry = table[hash];
         while (entry->getNext() != NULL) entry = entry->getNext();
         if (entry->getKey() == key) entry->setValue(value);
-        else
-        {
+        else {
             entry->setNext(new HashEntry(key, value));
             currSize++;
         }
@@ -106,25 +97,19 @@ template <typename K, typename V>
 void HashTableIndex<K,V>::remove(K key)
 {
     int hash = (key % TABLE_SIZE);
-    if (table[hash] != NULL)
-    {
+    if (table[hash] != NULL) {
         HashEntry *prev = NULL;
         HashEntry *entry = table[hash];
-        while (entry->getNext() != NULL & entry->getKey() != key)
-        {
+        while (entry->getNext() != NULL & entry->getKey() != key) {
             prev = entry;
             entry = entry->getNext();
         }
-        if (entry->getKey() == key)
-        {
-            if (prev == NULL)
-            {
+        if (entry->getKey() == key) {
+            if (prev == NULL) {
                 HashEntry *nxt = entry->getNext();
                 delete entry;
                 table[hash] = nxt;
-            }
-            else
-            {
+            } else {
                 HashEntry *nxt = entry->getNext();
                 delete entry;
                 prev->setNext(nxt);
@@ -132,4 +117,10 @@ void HashTableIndex<K,V>::remove(K key)
             currSize--;
         }
     }
+}
+
+template <typename K, typename V>
+HashEntry* HashTableIndex::find(K keyword)
+{
+    // TODO: to be implemented
 }

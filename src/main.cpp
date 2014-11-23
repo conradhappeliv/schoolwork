@@ -7,6 +7,7 @@
 #include "src/xmlparser.h"
 #include "src/index.h"
 #include "src/listindex.h"
+#include "src/queryprocessor.h"
 
 enum modes {
     MAINTENANCE,
@@ -61,6 +62,14 @@ int main(int argc, char* argv[])
         else if(ops >> GetOpt::OptionPresent('t', "hashtable")) indexType = HASHTABLE;
         while(true) { // enter a loop to allow the user to search index
             std::cout << "infinite loop";
+            if (indextype == AVLTREE) {
+                queryproc = new queryprocessor(AVLTREE);
+            } else if (indextype == HASHTABLE) {
+                queryproc = new queryprocessor(HASHTABLE);
+            } else {
+                std::cout << "invalid data structure implementation called" << std::endl;
+                break;
+            }
         }
     } else if(mode == STRESS) {
         std::cout << "~~~ STRESS TEST MODE ~~~" << std::endl;

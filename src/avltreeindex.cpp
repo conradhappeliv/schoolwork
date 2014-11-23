@@ -1,7 +1,9 @@
+// Owner: Edward Li
+
 #include "avltreeindex.h"
 #include <iostream>
 
-// cpmstructpr
+// constructor
 AVLTreeIndex::AVLTreeIndex()
 {
     root = NULL;
@@ -16,8 +18,7 @@ AVLTreeIndex::~AVLTreeIndex()
 // used by destructor to recursively delete nall nodes in tree
 void AVLTreeIndex::clear(AVLTreeNode *n)
 {
-    if (n != NULL)
-    {
+    if (n != NULL) {
         clear(n->left);
         clear(n->right);
         delete n;
@@ -34,15 +35,13 @@ void AVLTreeIndex::insert(AVLTreeNode *newNode)
     parent = NULL; // parent node to current node
 
     // case: tree is empty
-    if (root == NULL)
-    {
+    if (root == NULL) {
         root = newNode;
         return;
     }
 
     // case: tree is not empty, traverse for location to insert till temp reaches end
-    while (temp != NULL)
-    {
+    while (temp != NULL) {
         prev = temp;
         if (temp->balance != balanced) parent = temp;
         if (newNode->key < temp->key) temp = temp->left;
@@ -59,8 +58,7 @@ void AVLTreeIndex::insert(AVLTreeNode *newNode)
 void AVLTreeIndex::restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode)
 {
     // case 1: parent is balanced, newNode unbalances
-    if (parent == NULL)
-    {
+    if (parent == NULL) {
         if (newNode->key < root->key) root->balance = biasleft; // newNode inserted left of root
         else root->balance = biasright; // newNode inserted right of root
         adjustBalance(root, newNode);
@@ -68,25 +66,18 @@ void AVLTreeIndex::restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode)
 
     // case 2: insertion of newNode in opposite subtree of parent's current balance
     else if (((parent->balance == biasleft) && (newNode->key > parent->key)) ||
-             ((parent->balance == biasright) && (newNode->key < parent->key)))
-    {
+             ((parent->balance == biasright) && (newNode->key < parent->key))) {
         parent->balance = balanced;
         adjustBalance(parent, newNode);
     }
 
     // case 3: insertion of newNode in right child of parent
-    else if (parent->balance == biasright)
-    {
-        // insertion into right subtree of right child
-        if (newNode->key > parent->right->key) // single rotation left
-        {
+    else if (parent->balance == biasright) {
+        if (newNode->key > parent->right->key) { // insertion into right subtree of right child, single rotation left
             parent->balance = balanced;
             rotateLeft(parent);
             adjustBalance(parent->parent, newNode);
-        }
-        // insertion into left subtree of right child
-        else if (newNode->key < parent->right->key) // double rotation left
-        {
+        } else if (newNode->key < parent->right->key) { // insertion into left subtree of right child, double rotation left
             rotateRight(parent->right);
             rotateLeft(parent);
             adjustRL(parent, newNode);
@@ -94,18 +85,12 @@ void AVLTreeIndex::restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode)
     }
 
     // case 4: insertion of newNode in left child of parent
-    else if (parent->balance == biasleft)
-    {
-        // insertion into left subtree of left child
-        if (newNode->key < parent->left->key) // single rotation right
-        {
+    else if (parent->balance == biasleft) {
+        if (newNode->key < parent->left->key) { // insertion into left subtree of left child, single rotation right
             parent->balance = balanced;
             rotateRight(parent);
             adjustBalance(parent->parent, newNode);
-        }
-        // insertion into right subtree of left child
-        else if (newNode->key < parent->right->key) // double rotation right
-        {
+        } else if (newNode->key < parent->right->key) { // insertion into right subtree of left child, double rotation right
             rotateLeft(parent->left);
             rotateRight(parent);
             adjustLR(parent, newNode);
@@ -117,8 +102,7 @@ void AVLTreeIndex::restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode)
 void AVLTreeIndex::adjustBalance(AVLTreeNode *last, AVLTreeNode *first)
 {
     AVLTreeNode *temp = first->parent;
-    while (temp != last)
-    {
+    while (temp != last) {
         if (first->key < temp->key) temp->balance = biasleft;
         else temp->balance = biasright;
         temp = temp->parent;
@@ -131,12 +115,10 @@ void AVLTreeIndex::rotateLeft(AVLTreeNode *n)
     AVLTreeNode *temp = n->right; // point to n's right child
     n->right = temp->left; // temp's left child = n's right child
     if (temp->left != NULL) temp->left->parent = n; // if left child exists, reset parent
-    if (n->parent == NULL) // if n is root
-    {
+    if (n->parent == NULL) { // if n is root
         root = temp;
         temp->parent = NULL;
-    }
-    else if (n->parent->left == n) n->parent->left = temp; // if n is left child of parent, temp is new left child
+    } else if (n->parent->left == n) n->parent->left = temp; // if n is left child of parent, temp is new left child
     else n->parent->right = temp; // if n is right child of parent, temp is new right child
 
     temp->left = n; // n is left child of temp
@@ -149,12 +131,10 @@ void AVLTreeIndex::rotateRight(AVLTreeNode *n)
     AVLTreeNode *temp = n->left; // point to n's left child
     n->left = temp->right; // temp's right child = n's left child
     if (temp->right!= NULL) temp->right->parent = n; // if right child exists, reset parent
-    if (n->parent == NULL) // if n is root
-    {
+    if (n->parent == NULL) { // if n is root
         root = temp;
         temp->parent = NULL;
-    }
-    else if (n->parent->left == n) n->parent->left = temp; // if n is left child of parent, temp is new left child
+    } else if (n->parent->left == n) n->parent->left = temp; // if n is left child of parent, temp is new left child
     else n->parent->right = temp; // if n is right child of parent, temp is new right child
 
     temp->right = n; // n is right child of temp
@@ -165,13 +145,10 @@ void AVLTreeIndex::rotateRight(AVLTreeNode *n)
 void AVLTreeIndex::adjustLR(AVLTreeNode *last, AVLTreeNode *first)
 {
     if (last == root) last->balance = balanced;
-    else if (first->key < last->parent->key)
-    {
+    else if (first->key < last->parent->key) {
         last->balance = biasright;
         adjustBalance(last->parent->left, first);
-    }
-    else
-    {
+    } else {
         last->balance = balanced;
         last->parent->left->balance = biasleft;
         adjustBalance(last, first);
@@ -182,13 +159,10 @@ void AVLTreeIndex::adjustLR(AVLTreeNode *last, AVLTreeNode *first)
 void AVLTreeIndex::adjustRL(AVLTreeNode *last, AVLTreeNode *first)
 {
     if (last == root) last->balance = balanced;
-    else if (first->key > last->parent->key)
-    {
+    else if (first->key > last->parent->key) {
         last->balance = biasleft;
         adjustBalance(last->parent->right, first);
-    }
-    else
-    {
+    } else {
         last->balance = balanced;
         last->parent->right->balance = biasright;
         adjustBalance(last, first);
@@ -206,27 +180,27 @@ void AVLTreeIndex::printTree()
 
 void AVLTreeIndex::print(AVLTreeNode *n)
 {
-    if (n != NULL)
-    {
+    if (n != NULL) {
         std::cout << "Node" << n->key << "\n";
         std::cout << "Balance factor: " << n->balance << "\n\n";
 
         // print left subtree
-        if (n->left != NULL)
-        {
+        if (n->left != NULL) {
             std::cout << "***left child***\n";
             print(n->left);
             std::cout << "returning to node " << n->key << " from left subtree\n";
-        }
-        else std::cout << "***left subtree is empty\n";
+        } else std::cout << "***left subtree is empty\n";
 
         // print right subtree
-        if (n->right != NULL)
-        {
+        if (n->right != NULL) {
             std::cout << "***right child***\n";
             print(n->right);
             std::cout << "returning to node " << n->key << " from right subtree\n";
-        }
-        else std::cout << "***right subtree is empty\n";
+        } else std::cout << "***right subtree is empty\n";
     }
+}
+
+AVLTreeNode* AVLTreeIndex::find(std::string keyword)
+{
+    // TODO: to be implemented
 }
