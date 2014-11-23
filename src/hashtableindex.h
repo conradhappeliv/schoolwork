@@ -27,12 +27,6 @@ private:
         HashEntry *next;
     };
 
-    HashEntry **table;
-    float threshold;
-    int tableSize;
-    int currSize;
-    int maxSize;
-
 public:
     HashTableIndex();
     ~HashTableIndex();
