@@ -28,7 +28,6 @@ SOURCES += src/main.cpp \
     src/processor.cpp\
     src/hashtableindex.cpp\
     src/avltreeindex.cpp\
-    src/hashentry.cpp \
     src/queryprocessor.cpp
 
 HEADERS += src/index.h \
@@ -39,5 +38,4 @@ HEADERS += src/index.h \
     src/Page.h\
     src/hashtableindex.h\
     src/avltreeindex.h\
-    src/hashentry.h \
     src/queryprocessor.h
