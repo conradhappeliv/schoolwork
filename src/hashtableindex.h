@@ -2,6 +2,7 @@
 
 #ifndef HASHTABLEINDEX_H
 #define HASHTABLEINDEX_H
+#include <vector>
 
 const int TABLE_SIZE = 1000;
 
@@ -11,7 +12,7 @@ class HashTableIndex
 
 private:
     struct HashEntry {
-        HashEntry(const K &key, const V &val):keyword(key), value(val), next(NULL) {}
+        HashEntry(const K &key, const V &val):keyword(key), value(val), next(nullptr) {}
         K getKey() const {return keyword;}
         V getValue() const {return value;}
         void setValue(V value) {
@@ -35,10 +36,10 @@ public:
     void remove(K key);
     void resize();
     //HashEntry* find(K keyword); // TODO: to be implemented
-    HashEntry<K, V>* find(K keyword); // TODO: to be implemented
+    std::vector<V> find(K keyword); // TODO: to be implemented
 
 private:
-    HashEntry<K, V> **table;
+    HashEntry **table;
 
     float threshold;
     int tableSize;

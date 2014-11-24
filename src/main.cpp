@@ -6,9 +6,7 @@
 #include "lib/getopt_pp.h"
 #include "src/xmlparser.h"
 #include "src/index.h"
-#include "src/listindex.h"
 #include "src/queryprocessor.h"
-#include "src/avltree.h"
 #include "src/stlhashtableindex.h"
 
 enum modes {

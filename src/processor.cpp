@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <thread>
 
-#include <../lib/c_threadsafe_porter.h>
+#include <./lib/c_threadsafe_porter.h>
 
 #include "processor.h"
 #include "xmlparser.h"

@@ -11,8 +11,8 @@ HashTableIndex<K,V>::HashTableIndex()
     threshold = 0.75;
     maxSize = (int)(threshold * tableSize);
 
-    table = new HashEntry<K, V>*[tableSize];
-    for (int i = 0; i < tableSize; i++) table[i] = NULL;
+    table = new HashEntry*[tableSize];
+    for (int i = 0; i < tableSize; i++) table[i] = nullptr;
 }
 
 // destructor
@@ -20,10 +20,10 @@ template <typename K, typename V>
 HashTableIndex<K,V>::~HashTableIndex()
 {
     for (int i = 0; i < TABLE_SIZE; i++) {
-        if (table[i] != NULL) {
-            HashEntry<K, V> *prev = NULL;
-            HashEntry<K, V> *entry = table[i];
-            while (entry != NULL) {
+        if (table[i] != nullptr) {
+            HashEntry *prev = nullptr;
+            HashEntry *entry = table[i];
+            while (entry != nullptr) {
                 prev = entry;
                 entry = entry->getNext();
                 delete prev;
@@ -41,15 +41,15 @@ void HashTableIndex<K,V>::resize()
     tableSize *= 2;
     maxSize = (int) (threshold * tableSize);
 
-    HashEntry<K, V> **oldTable = table;
-    table = new HashEntry<K, V>*[tableSize];
-    for (int i = 0; i < tableSize; i++) table[i] = NULL;
+    HashEntry **oldTable = table;
+    table = new HashEntry*[tableSize];
+    for (int i = 0; i < tableSize; i++) table[i] = nullptr;
     currSize = 0;
     for (int j = 0; j < oldSize; j++) {
-        if (oldTable[j] != NULL) {
-            HashEntry<K, V> *oldEntry;
-            HashEntry<K, V> *entry = oldTable[j];
-            while (entry != NULL) {
+        if (oldTable[j] != nullptr) {
+            HashEntry *oldEntry;
+            HashEntry *entry = oldTable[j];
+            while (entry != nullptr) {
                 insert(entry->getKey(), entry->getValue());
                 oldEntry = entry;
                 entry = entry->getNext();
@@ -64,11 +64,11 @@ template <typename K, typename V>
 V HashTableIndex<K, V>::get(K key)
 {
     int hash = (key % TABLE_SIZE);
-    if (table[hash] == NULL) return -1;
+    if (table[hash] == nullptr) return -1;
     else {
-        HashEntry<K, V>* entry = table[hash];
-        while (entry != NULL && entry->getKey() != key) entry = entry->getNext();
-        if (entry == NULL) return -1;
+        HashEntry* entry = table[hash];
+        while (entry != nullptr && entry->getKey() != key) entry = entry->getNext();
+        if (entry == nullptr) return -1;
         else return entry->getValue();
     }
 }
@@ -77,16 +77,16 @@ template <typename K, typename V>
 void HashTableIndex<K,V>::insert(K key, V value)
 {
     int hash = (key % TABLE_SIZE);
-    if (table[hash] == NULL)
+    if (table[hash] == nullptr)
     {
-        table[hash] = new HashEntry<K, V>(key, value);
+        table[hash] = new HashEntry(key, value);
         currSize++;
     } else {
-        HashEntry<K, V> *entry = table[hash];
-        while (entry->getNext() != NULL) entry = entry->getNext();
+        HashEntry *entry = table[hash];
+        while (entry->getNext() != nullptr) entry = entry->getNext();
         if (entry->getKey() == key) entry->setValue(value);
         else {
-            entry->setNext(new HashEntry<K, V>(key, value));
+            entry->setNext(new HashEntry(key, value));
             currSize++;
         }
     }
@@ -97,20 +97,20 @@ template <typename K, typename V>
 void HashTableIndex<K,V>::remove(K key)
 {
     int hash = (key % TABLE_SIZE);
-    if (table[hash] != NULL) {
-        HashEntry<K, V> *prev = NULL;
-        HashEntry<K, V> *entry = table[hash];
-        while (entry->getNext() != NULL & entry->getKey() != key) {
+    if (table[hash] != nullptr) {
+        HashEntry *prev = nullptr;
+        HashEntry *entry = table[hash];
+        while (entry->getNext() != nullptr & entry->getKey() != key) {
             prev = entry;
             entry = entry->getNext();
         }
         if (entry->getKey() == key) {
-            if (prev == NULL) {
-                HashEntry<K, V> *nxt = entry->getNext();
+            if (prev == nullptr) {
+                HashEntry *nxt = entry->getNext();
                 delete entry;
                 table[hash] = nxt;
             } else {
-                HashEntry<K, V> *nxt = entry->getNext();
+                HashEntry *nxt = entry->getNext();
                 delete entry;
                 prev->setNext(nxt);
             }
@@ -120,7 +120,7 @@ void HashTableIndex<K,V>::remove(K key)
 }
 
 template <typename K, typename V>
-HashEntry<K, V>* HashTableIndex<K, V>::find(K keyword)
+std::vector<V> HashTableIndex<K, V>::find(K keyword)
 {
     // TODO: to be implemented
 }
