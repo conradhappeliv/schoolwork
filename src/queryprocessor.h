@@ -10,8 +10,8 @@ class queryprocessor
 {
 public:
     queryprocessor(int indextype);
-    void processQuery();
-    void search(std::string term, std::string delim);
+    std::vector<std::string> processQuery(std::string query);
+    //void search(std::string term, std::string delim);
     //void printResults();
 
 private:

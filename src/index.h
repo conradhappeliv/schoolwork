@@ -32,6 +32,7 @@ public:
     virtual void save() = 0;
     virtual void load() = 0;
     virtual void clear() = 0;
+    virtual void find(std::string) = 0;
 
     std::string IDtoTitle(const unsigned int);
     std::string IDtoText(const unsigned int);

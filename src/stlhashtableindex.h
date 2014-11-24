@@ -1,3 +1,5 @@
+// Owner: Edward Li
+
 #ifndef STLHashTableIndex_H
 #define STLHashTableIndex_H
 
@@ -14,6 +16,7 @@ public:
     virtual void save();
     virtual void load();
     virtual void clear();
+    virtual void find(std::string);
 private:
     std::mutex tableLock;
     std::unordered_map<std::string, entry> table;

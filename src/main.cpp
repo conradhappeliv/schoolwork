@@ -50,27 +50,62 @@ int main(int argc, char* argv[])
             threads[0].join();
             threads[1].join();
 
+            index->save();
         } else if(ops >> GetOpt::OptionPresent('c', "clear")){ // clear index
-
+            Index* index = new STLHashTableIndex("./default.index");
+            index->clear();
+        } else if(ops >> GetOpt::OptionPresent('o', "open")) { // open index file TEST FUNCTIONALITY
+            Index* index = new STLHashTableIndex("./default.index");
+            index->load();
         } else { // show help relevant to maintenance mode
 
         }
     } else if(mode == INTERACTIVE) {
         std::cout << "~~~ INTERACTIVE MODE ~~~" << std::endl;
-        int indexType = AVLTREE; // default index type
-        if(ops >> GetOpt::OptionPresent('a', "avltree")) indexType = AVLTREE;
-        else if(ops >> GetOpt::OptionPresent('t', "hashtable")) indexType = HASHTABLE;
-        /*while(true) { // enter a loop to allow the user to search index
-            std::cout << "infinite loop";
-            if (indexType == AVLTREE) {
-                queryproc = new queryprocessor(AVLTREE);
-            } else if (indexType == HASHTABLE) {
-                queryproc = new queryprocessor(HASHTABLE);
-            } else {
-                std::cout << "invalid data structure implementation called" << std::endl;
-                break;
+
+        std::string filepath;
+        Index* index;
+        int indexType = HASHTABLE; // default index type
+
+        if(ops >> GetOpt::Option('a', "avltree", filepath)) {
+            indexType = AVLTREE;
+            // declare new AVLTreeIndex
+        } else if(ops >> GetOpt::Option('t', "hashtable", filepath)) {
+            indexType = HASHTABLE;
+            index = new STLHashTableIndex("./default.index");
+            index->load();
+/*
+            std::thread threads[2];
+            Index* index = new STLHashTableIndex("./default.index");
+            XMLParser parser(filepath, index);
+
+            threads[0] = std::thread([&]() {
+                parser.parse();
+            });
+            threads[1] = std::thread([&]() {
+                parser.beginProcessing();
+            });
+            threads[0].join();
+            threads[1].join();*/
+        }
+
+        bool exit = false;
+        queryprocessor* qproc = new queryprocessor(indexType);
+
+        // enter a loop to allow the user to search index and process queries
+        while (!exit) {
+            char q[100];
+            std::vector<std::string> processed;
+
+            std::cout << "Please enter a search query: ";
+            std::cin.getline(q, 100);
+            std::string query(q);
+            if (query == "exit") exit = true;
+            processed = qproc->processQuery(query);
+            for(std::vector<std::string>::iterator it = processed.begin(); it != processed.end(); ++it) {
+                index->find(*it);
             }
-        }*/
+        }
     } else if(mode == STRESS) {
         std::cout << "~~~ STRESS TEST MODE ~~~" << std::endl;
         std::string filepath;
