@@ -8,6 +8,8 @@
 #include "src/index.h"
 #include "src/listindex.h"
 #include "src/queryprocessor.h"
+#include "src/avltree.h"
+#include "src/stlhashtableindex.h"
 
 enum modes {
     MAINTENANCE,
@@ -38,7 +40,7 @@ int main(int argc, char* argv[])
         std::string filepath;
         if(ops >> GetOpt::Option('f', "filename", filepath)) { // add file to index
             std::thread threads[2];
-            Index* index = new ListIndex("./default.index");
+            Index* index = new STLHashTableIndex("./default.index");
             XMLParser parser(filepath, index);
 
             threads[0] = std::thread([&]() {

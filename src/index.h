@@ -33,7 +33,6 @@ public:
     virtual void load() = 0;
     virtual void clear() = 0;
 
-    // we can use a hashtable for each of these and actually implement them in this parent class
     std::string IDtoTitle(const unsigned int);
     std::string IDtoText(const unsigned int);
 private:

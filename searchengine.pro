@@ -27,10 +27,10 @@ SOURCES += src/main.cpp \
     src/xmlparser.cpp\
     src/processor.cpp\
     src/hashtableindex.cpp\
-    src/avltreeindex.cpp\
     src/hashentry.cpp \
     src/queryprocessor.cpp \
-    src/listindex.cpp
+    src/listindex.cpp \
+    src/stlhashtableindex.cpp
 
 HEADERS += src/index.h \
     lib/getopt_pp.h\
@@ -39,7 +39,8 @@ HEADERS += src/index.h \
     src/processor.h\
     src/Page.h\
     src/hashtableindex.h\
-    src/avltreeindex.h\
     src/hashentry.h \
     src/queryprocessor.h \
-    src/listindex.h
+    src/listindex.h \
+    src/avltree.h \
+    src/stlhashtableindex.h

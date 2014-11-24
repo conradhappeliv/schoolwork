@@ -49,10 +49,9 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
                 // calculate frequencies
                 if(frequencies.count(word) > 0) frequencies[word] = frequencies[word] + 1;
                 else frequencies[word] = 1;
-                for(auto i = frequencies.begin(); i != frequencies.end(); i++) {
-                    //index->add(page->id, i->first, i->second);
-                    //std::cout << i->first << ": " << i->second << std::endl;
-                }
+            }
+            for(auto i = frequencies.begin(); i != frequencies.end(); i++) {
+                index->add(page->id, i->first, i->second);
             }
             index->addDoc(page->id, page);
             if(page->id % 5 == 0) std::cout << "finished page " << page->id << std::endl;
@@ -63,8 +62,9 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
 
 void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, const bool* completedParsing, Index* index) {
     std::cout << "processing begins" << std::endl;
-    unsigned int numOfThreads = 30;
+    unsigned int numOfThreads = 16;
     std::thread threads[numOfThreads];
+
     for(unsigned int i = 0; i < numOfThreads; i++) {
         threads[i] = std::thread(threadProcess, &toBeProcessed, &TBPLock, completedParsing, index);
     }
