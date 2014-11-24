@@ -27,7 +27,11 @@ SOURCES += src/main.cpp \
     src/xmlparser.cpp\
     src/processor.cpp\
     src/hashtableindex.cpp\
+<<<<<<< HEAD
     src/hashentry.cpp \
+=======
+    src/avltreeindex.cpp\
+>>>>>>> 9f08caf5e3bd5eada4125244bd73ca38ca4d1b43
     src/queryprocessor.cpp \
     src/listindex.cpp \
     src/stlhashtableindex.cpp
