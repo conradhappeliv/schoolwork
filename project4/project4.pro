@@ -9,7 +9,8 @@ SOURCES += \
     composite_Gauss2.cpp \
     mat.cpp \
     adaptive_int.cpp \
-    test_adapt.cpp
+    test_adapt.cpp \
+    carbon.cpp
 
 HEADERS += \
     mat.h

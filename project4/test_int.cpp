@@ -21,7 +21,7 @@ int main() {
     printf("True integral value = %22.16e\n\n", trueVal);
 
     // test composite numerical integration function
-    int n[] = {6, 12, 24, 48, 96, 192, 384, 768, 1536, 3072};
+    int n[] = {6, 12, 24, 36, 48, 60, 72, 84, 96, 108};
     int ntests = 10;
     Mat errs(ntests);
     Mat hvals(ntests);
