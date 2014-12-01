@@ -19,7 +19,7 @@ double steffensen(double (*f)(const double), double x, int maxit, double tol) {
         // find current df value using Steffensen's
         double df_of_x = (f_of_x - f(res - f_of_x))/f_of_x;
 
-        if(df_of_x == 0) break;
+        if(df_of_x == 0) break; // can't divide by 0
 
         // x(n+1) = x(n) - f(x(n))/f'(x(n))
         res = res - f_of_x/df_of_x;

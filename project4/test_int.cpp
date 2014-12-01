@@ -1,3 +1,7 @@
+// Conrad Appel
+// MATH 3316
+// 2 Dec 2014
+
 #include <iostream>
 #include <cmath>
 

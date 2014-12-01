@@ -5,22 +5,54 @@ Conrad Appel - 12/02/2014 - MATH 3316
 
 In this project, I will design a function used to approximate an integral over a given interval with a certain number of subintervals. Then, in an effort to reduce wasted computational effort, I will create another method that only calls the first method up until a certain number of intervals, determined by the accuracy gain between two subsequent calculations. Then, using this more efficient implementation, I will attempt to model concentrations of carbon relative to iron in an alloy during the process of carburizing. Finally, using this model, I should be able solve a given problem of finding a time needed to reach a certain concentration with certain given variables.
 
+*Program outputs, code, and plots are all organized in the appendices at the end of the document.*
+
 Part 1: High-order Numerical Integration
 ----------------------------------------
 
-In this first section, I need to inplement an algorithm for approximating an integral with a convergence rate of at least h^7.
+Code for this part:
+* ./composite_int.cpp
+* ./test_int.cpp
+
+In this first section, I need to inplement an algorithm for approximating an integral with a convergence rate of at least h^7. I then wrote a test used to affirm that said implementation actually reaches that rate of convergence.
+
+After testing out a few different methods of composite numerical integration, I settled on _____, which allowed me to achieve the required rate of convergence while still maintaining the smallest necessary amount of computational effort. I was also able to use much smaller values of n than the given Gauss method because this method of numerical integration is able to converge much quicker than the methods with less nodes.
 
 Part 2: Adaptive Numerical Integration
 ---------------------------------------
 
+Code for this part:
+* ./adaptive_int.cpp
+* ./test_adapt.cpp
+
+In the second part of the project, I utilized the `composite_int` function created in part one in a way to reach a certain level of accuracy without using unnecessary computational power. To achieve this goal, this `adaptive_int` function would call `composite_int()` with increasing numbers of `n`, stopping when the increase in accuracy is less than a combination of given relative and absolute tolerances. In doing so, we save ourselves from under-guessing or over-guessing the "correct" value of `n`. 
+
+However, there are potential problems with using this method over the simple `composite_int` method. First, finding the ideal value of `n` requires calling `composite_int` a number of times until the desired accuracy is found. Along the way, the total number of intervals the `composite_int` function needs to calculate on could greatly surpass the final value of n used. Another issue arises if the `composite_int` method used within has trouble converging quickly enough or at all. For these cases, I added a line of code that would end the function at a certain number of n, in an attempt to stop the loop from running infinitely or for an unreasonable amount of time. Even with this workaround, it could take a relatively large amount of time and effort to reach the set limit, and the effort would probably be wasted in the end.
+
+An implementation problem I ran into was deciding a value `k` to increase `n` by during each iteration. If `k` was a small constant value, it would most likely take far too long to reach the ideal `n`, whereas if k were a large constant, it would be very easy to overshoot the value of `n` and need to do unnecessary work. Since there is no one "magic" `k` value, I decided to use a `k` value proportional to the current `n` value. I chose this method because at a small `n`, it would increase on the next iteration by a small `k`, and at a larger `n` value, it would increase by a proportionally larger `k`. This method would resolve the issue of having a large `k` cause earth-shatteringly large effects on a small `n` or an increase of a small `k` on a large `n` having next to no effect. This method of choosing a `k` additionally better represents the `adaptive` attribute of this method of integration.
+
+*Side note: The value of k could probably be better chosen by comparing the error in the current iteration to the desired error and setting the `k/n` according to the comparison. I did not get a chance to experiment with this.*
+
+When running the `adaptive_int` method using the `test_adapt.cpp` driver (figure A:./test_adapt.out), I was able to demonstrate both the benefits and shortcomings of using this method. Like I expected, the method was indeed able to achieve an accuracy calculated with given relative and absolute tolerances, and was able to do so with only a small overhead from finding the ideal `n`. At its worst in these trials, the method needed only 1415 additional calculated `n`s to reach the desired accuracy with `n = 250`. While experimenting with fixed proportions of `k/n`, I noticed that a smaller proportion was better for more tolerant accuracies and for finding the value of n that causes the error to match the desired accuracy most closely. A 1:1 proportion seemed to work most efficiently (required the least `nTot`) while still closely matching the desired accuracy in general. However, no matter how efficient the method is, it always requires extra work. It does save work in the long run because we have no better way of determining the ideal value of `n`.
 
 Part 3: Application
 -------------------
 
+Code for this part:
+* ./carbon.cpp
+* ./test_carbon.cpp
+* ./carbon.py
+
+In this section, I needed to apply the integration methods to a real problem. The problem given is to create a model of the the concentration of carbon in an alloy during the process of carburization, where I need to approximate an integral in the error function (*erf*) with the `adaptive_int` method. This model is implemented in the `./carbon.cpp` file. The only implementation issue I ran into was when the `t` parameter was less than or equal to zero. In that case, I returned the initial concentration of carbon, `C0`.
+
+I also created a test driver, `./test_carbon.cpp`, which demonstrates the usage of the model with a variety of different parameters (depth, time, and temperature). The first of these is an array of depths linearly spaced from 0-4 mm and times linearly spaced from 0-48 hours, with a fixed temperature of 900 K. The second is the same test, with a temperature of 1100 K. The third test holds the time still at 1, 6, 12, 24, and 48 hours with a temperature of 900 K and with x from 0-4 mm. The fourth is the same as the third, but with a temperature of 1100 K. All tests output their results to files, which are loaded in the Python script `./carbon.py` and then graphed. The first two are graphed as contour plots, and the third and fourth are graphed as overlayed lines (one for each time). All four graphs are displayed and explained in Appendix C.
 
 Part 4: Problem
 ---------------
 
+Code for this part:
+* ./application.cpp
+* ./steffensen.cpp (adapted from project 2)
 
 
 Appendix A: Code Output
@@ -33,14 +65,14 @@ Appendix A: Code Output
     Composite Numerical Integration Approximation:
             6  6.4871424830042372e+01  2.5e-03     ----
            12  6.4958352643429464e+01  1.2e-03   1.108340
-           24  6.5034198198284486e+01  9.9e-06   6.861118
+           24  6.5034198198284500e+01  9.9e-06   6.861118
            36  6.5033499697655969e+01  7.9e-07   6.234199
            48  6.5033549618853030e+01  2.6e-08   11.820033
            60  6.5033551131199360e+01  3.2e-09   9.421540
-           72  6.5033551299509654e+01  6.5e-10   8.818501
-           84  6.5033551330378131e+01  1.7e-10   8.544765
-           96  6.5033551337990318e+01  5.7e-11   8.392383
-          108  6.5033551340287318e+01  2.1e-11   8.297458
+           72  6.5033551299509682e+01  6.5e-10   8.818505
+           84  6.5033551330378131e+01  1.7e-10   8.544760
+           96  6.5033551337990332e+01  5.7e-11   8.392412
+          108  6.5033551340287318e+01  2.1e-11   8.297426
 
 
 
@@ -50,11 +82,11 @@ Appendix A: Code Output
     
         rtol     atol      n    nTot        R         |I(f)-R(f)|  rtol|I(f)|+atol
       1.0e-02 | 1.0e-05 |  20 |    35 | 6.503599e+01 |  2.4e-03  |   6.5e-01
-      1.0e-04 | 1.0e-07 |  26 |    81 | 6.503399e+01 |  4.4e-04  |   6.5e-03
-      1.0e-06 | 1.0e-09 |  60 |   325 | 6.503355e+01 |  2.1e-07  |   6.5e-05
-      1.0e-08 | 1.0e-11 |  80 |   465 | 6.503355e+01 |  1.7e-08  |   6.5e-07
-      1.0e-10 | 1.0e-13 | 141 |   898 | 6.503355e+01 |  1.6e-10  |   6.5e-09
-      1.0e-12 | 1.0e-15 | 250 |  1665 | 6.503355e+01 |  1.5e-12  |   6.5e-11
+      1.0e-04 | 1.0e-07 |  40 |    95 | 6.503354e+01 |  1.2e-05  |   6.5e-03
+      1.0e-06 | 1.0e-09 |  80 |   215 | 6.503355e+01 |  1.7e-08  |   6.5e-05
+      1.0e-08 | 1.0e-11 | 160 |   455 | 6.503355e+01 |  5.6e-11  |   6.5e-07
+      1.0e-10 | 1.0e-13 | 320 |   935 | 6.503355e+01 |  2.1e-13  |   6.5e-09
+      1.0e-12 | 1.0e-15 | 320 |   935 | 6.503355e+01 |  2.1e-13  |   6.5e-11
     
 
 
@@ -67,8 +99,8 @@ Appendix A: Code Output
 `./application.out`
 
     Result: 
-    	30 seconds
-    	0 hours, 0 minutes, 30 seconds
+    	39079.0574169 seconds
+    	10 hours, 51 minutes, 19.0574169 seconds
 
 
 
@@ -77,6 +109,10 @@ Appendix B: Code
 
 `./adaptive_int.cpp`
 
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    
     #include <cmath>
     
     #include "composite_int.cpp"
@@ -92,7 +128,7 @@ Appendix B: Code
             cur = next;
             n = n + k;
             next = composite_int(f, a, b, n);
-            k = n/3;
+            k = n;
         } while(std::abs(next-cur) >= (rtol*std::abs(next) + atol));
         R = next;
         return 0;
@@ -102,29 +138,48 @@ Appendix B: Code
 
 `./application.cpp`
 
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    
     #include "carbon.cpp"
     #include "mat.h"
+    #include "steffensen.cpp"
     
+    #include <iomanip>
     
+    // problem constants
     const double rtoler = 1e-14;
     const double atoler = 1e-15;
+    const double depth = .002; // m
+    const double temperature = 1e3; // Kelvin
+    
+    // t is the answer when this function
+    // is 0.
+    // basically a reconfiguration of C(x, t, T) = .5%
+    double solve_me(const double t) {
+        return carbon(depth, t, temperature, rtoler, atoler)-.005;
+    }
     
     int main() {
-        const double depth = 2; // mm
-        const double temperature = 1e3; // Kelvin
-        double time = 30; // seconds
-    
-        //carbon(depth, time, temperature, rtoler, atoler);
+        double time = steffensen(solve_me, 39000, 10000, 1e-6);
+        int hours = time/3600;
+        int minutes = (time - hours*3600)/60;
+        double seconds = time - hours*3600 - minutes*60;
     
         std::cout << "Result: " << std::endl;
-            std::cout << '\t' << time << " seconds" << std::endl;
-            std::cout << '\t' << (int) time/3600 << " hours, " << (int) time/60 << " minutes, " << ((int) time)%60 << " seconds" << std::endl;
+            std::cout << '\t' << std::setprecision(7) << std::fixed << time << " seconds" << std::endl;
+            std::cout << '\t' << hours << " hours, " << minutes << " minutes, " << std::setprecision(7) << std::fixed << seconds << " seconds" << std::endl;
     }
 
 
 
 `./carbon.cpp`
 
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    
     #include "adaptive_int.cpp"
     #include "mat.h"
     
@@ -139,7 +194,7 @@ Appendix B: Code
         int nTot;
         /*R = composite_int([](const double z){
             return std::exp(-(z*z));
-        }, 0, y, 2500);*/
+        }, 0, y, 500);*/
         adaptive_int([](const double z){
             return std::exp(-(z*z));
         }, 0, y, rtol, atol, R, n, nTot);
@@ -151,7 +206,8 @@ Appendix B: Code
         return 6.2e-7*std::exp(-8e4/(8.31*T));
     }
     
-    double carbon(const double x, const double t, const double T, const double rtol, const double atol) {
+    double carbon(double x, double t, const double T, const double rtol, const double atol) {
+        if(t <= 0) return C0;
         return Cs - (Cs-C0)*erf((x/std::sqrt(4*t*D(T))), rtol, atol);
     }
     
@@ -160,6 +216,10 @@ Appendix B: Code
 
 `./carbon.py`
 
+    # Conrad Appel
+    # MATH 3316
+    # 2 Dec 2014
+    
     from pylab import *
     
     x = loadtxt('./x.txt')
@@ -178,115 +238,46 @@ Appendix B: Code
     c1100_48 = loadtxt('./c1100_48hour.txt')
     
     figure(1)
-    imshow(c900)
-    xlabel('x')
-    ylabel('t')
+    imshow(c900, extent=[0, 4, 0, 48], aspect='auto')
+    xlabel('x (mm)')
+    ylabel('t (hours)')
+    title('Carbon Concentration at (x, t) with T = 900 K')
     colorbar(orientation='horizontal')
     savefig('c900.png')
     
     figure(2)
-    imshow(c1100)
-    xlabel('x')
-    ylabel('t')
+    imshow(c1100, extent=[0, 4, 0, 48], aspect='auto')
+    xlabel('x (mm)')
+    ylabel('t (hours)')
+    title('Carbon Concentration at (x, t) with T = 1100 K')
     colorbar(orientation='horizontal')
     savefig('c1100.png')
     
     figure(3)
-    plot(x, c900_1)
-    plot(x, c900_6)
-    plot(x, c900_12)
-    plot(x, c900_24)
-    plot(x, c900_48)
+    plot(x, c900_1, label='1 hour')
+    plot(x, c900_6, label='6 hours')
+    plot(x, c900_12, label='12 hours')
+    plot(x, c900_24, label='24 hours')
+    plot(x, c900_48, label='48 hours')
+    xlabel('x (m)')
+    ylabel('C(x)')
+    title('Carbon Concentrations; T = 900K; Varying t')
+    legend(loc='upper right')
     savefig('c900_fixedt.png')
     
     figure(4)
-    plot(x, c1100_1)
-    plot(x, c1100_6)
-    plot(x, c1100_12)
-    plot(x, c1100_24)
-    plot(x, c1100_48)
+    plot(x, c1100_1, label='1 hour')
+    plot(x, c1100_6, label='6 hours')
+    plot(x, c1100_12, label='12 hours')
+    plot(x, c1100_24, label='24 hours')
+    plot(x, c1100_48, label='48 hours')
+    xlabel('x (m)')
+    ylabel('C(x)')
+    title('Carbon Concentrations; T = 1100K; Varying t')
+    legend(loc='upper right')
     savefig('c1100_fixedt.png')
     
     show()
-
-
-`./composite_Gauss2.cpp`
-
-    /* Daniel R. Reynolds
-       SMU Mathematics
-       Math 3316
-       28 October 2014 */
-    
-    // Inclusions
-    #include <stdlib.h>
-    #include <stdio.h>
-    #include <iostream>
-    #include <math.h>
-    
-    using namespace std;
-    
-    // This routine numerically approximates the integral
-    //    int_a^b fun(x) dx
-    // using the composite Gaussian quadrature rule with 2 points per 
-    // subinterval (i.e. O(h^4) accurate), over n subintervals.  We 
-    // require that fun have the calling syntax 
-    //    y = fun(x)
-    // where y is a double and x is a const double.
-    //
-    // Usage: F = composite_Gauss2(fun, a, b, n);
-    //
-    // inputs:   fun     integrand
-    //           a       lower limit of integration
-    //           b       upper limit of integration
-    //           n       number of subintervals
-    //
-    // outputs:  F       value of numerical integral
-    // 
-    double composite_Gauss2(double (*f)(const double), const double a, 
-    			const double b, const int n)
-    {
-    
-      // check input arguments
-      if (b < a) {
-        cerr << "error: illegal interval, b < a\n";
-        return 0.0;
-      }
-      if (n < 1) {
-        cerr << "error: illegal number of subintervals, n < 1\n";
-        return 0.0;
-      }
-    
-      // set subinterval width
-      double h = (b-a)/n;
-    
-      // set nodes/weights defining the quadrature method
-      double x1 = -sqrt(1.0/3.0);
-      double x2 =  sqrt(1.0/3.0);
-      double w1 =  1.0;
-      double w2 =  1.0;
-    
-      // initialize result
-      double F = 0.0;
-    
-      // loop over subintervals, accumulating result
-      double xmid, node1, node2;
-      for (int i=0; i<n; i++) {
-       
-        // determine evaluation points within subinterval
-        xmid  = a + (i+0.5)*h;
-        node1 = xmid + 0.5*h*x1;
-        node2 = xmid + 0.5*h*x2;
-    
-        // add Gauss2 approximation on this subinterval to result
-        F += w1*f(node1) + w2*f(node2);
-    
-      } // end loop
-    
-      // return final result
-      return (0.5*h*F);
-    
-    } // end of function
-
 
 
 `./composite_int.cpp`
@@ -306,7 +297,7 @@ Appendix B: Code
         return (  (.5 + 1.0/12*std::sqrt(10.0/3))*f(x0)
                 + (.5 - 1.0/12*std::sqrt(10.0/3))*f(x1)
                 + (.5 + 1.0/12*std::sqrt(10.0/3))*f(x2)
-                + (.5 - 1.0/12*std::sqrt(10.0/3))*f(x3));
+                + (.5 - 1.0/12*std::sqrt(10.0/3))*f(x3))*h*.5;
     }
     
     double composite_int(double (*f)(const double), const double a, const double b, const int n) {
@@ -315,13 +306,58 @@ Appendix B: Code
         for(unsigned int i = 0; i < n; i++) {
             sum += newton4(f, a + i*h, h);
         }
-        return sum*h*.5;
+        return sum;
+    }
+
+
+
+`./steffensen.cpp`
+
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    //
+    // Adapted from project 2 to better suit this application
+    
+    #include "mat.h"
+    
+    #include <iostream>
+    #include <cmath>
+    
+    double steffensen(double (*f)(const double), double x, int maxit, double tol) {
+        double prev_res = x;
+        double res = x;
+        for(unsigned int i = 0; i < maxit; i++) {
+            prev_res = res;
+            double f_of_x = f(res);
+    
+            // find current df value using Steffensen's
+            double df_of_x = (f_of_x - f(res - f_of_x))/f_of_x;
+    
+            if(df_of_x == 0) break;
+    
+            // x(n+1) = x(n) - f(x(n))/f'(x(n))
+            res = res - f_of_x/df_of_x;
+    
+            // residual after calculating next val
+            f_of_x = std::abs(f(res));
+    
+            // |h|
+            double sol_update = std::abs(res - prev_res);
+            if(sol_update <= tol)
+                break;
+        }
+        return res;
     }
 
 
 
 `./test_adapt.cpp`
 
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    
     #include <iostream>
     #include <cmath>
     
@@ -364,14 +400,18 @@ Appendix B: Code
 
 `./test_carbon.cpp`
 
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    
     #include "carbon.cpp"
     
     const double rtoler = 1e-12;
     const double atoler = 1e-14;
     
     int main() {
-        Mat x = Linspace(0, 4, 300);
-        Mat t = Linspace(0, 48, 500);
+        Mat x = Linspace(0, .004, 300); // m
+        Mat t = Linspace(0, 172800, 500); // seconds
         Mat c900 = Mat(300, 500);
         Mat c1100 = Mat(300, 500);
         Mat c900_1 = Mat(300);
@@ -455,6 +495,10 @@ Appendix B: Code
 
 `./test_int.cpp`
 
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    
     #include <iostream>
     #include <cmath>
     
