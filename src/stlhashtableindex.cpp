@@ -52,14 +52,12 @@ void STLHashTableIndex::load() {
 
     // read in index from file
     while (!fin.eof()) {
-    //for (int i=0; i < 7465; i++) {
-        // format: keyword;idf;id,freq;id,freq;id,freq;
         entry e;
         std::string keyword_in, idf_in, str_in, id_in, tf_in;
         std::getline(fin, keyword_in, ';');
         std::getline(fin, idf_in, ';');
         e.keyword = keyword_in;
-        e.idf = std::stoi(idf_in);
+        e.idf = std::atoi(idf_in.c_str());
         //std::cout << keyword_in << ";" << idf_in << ";";
 
         bool val = true;
@@ -67,11 +65,11 @@ void STLHashTableIndex::load() {
             std::getline(fin, id_in, ',');
             std::getline(fin, tf_in, ';');
             entry::doc d;
-            d.id = std::stoi(id_in);
-            d.termFreq = std::stoi(tf_in);
+            d.id = std::atoi(id_in.c_str());
+            d.termFreq = std::atoi(tf_in.c_str());
             e.documents.push_back(d);
             //std::cout << id_in << "," << tf_in << ";";
-            if (fin.peek() == '\n') {
+            if (fin.peek() == '\n' || !fin.good()) {
                 fin.get();
                 //std::cout << "end of line";
                 val = false;
