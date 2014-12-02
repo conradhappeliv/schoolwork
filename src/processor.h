@@ -16,6 +16,7 @@ public:
     Processor();
     static void process(std::stack<Page*>&, std::mutex&, const bool*, Index*); // TODO: this bool reference is probably bad practice lol
     static bool isStopWord(std::string);
+    static void stemWord(std::string&);
 private:
 };
 

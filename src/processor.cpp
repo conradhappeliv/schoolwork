@@ -54,7 +54,6 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
                 index->add(page->id, i->first, i->second);
             }
             index->addDoc(page->id, page);
-            if(page->id % 5 == 0) std::cout << "finished page " << page->id << std::endl;
         }
     }
     free_stemmer(z);
@@ -62,7 +61,7 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
 
 void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, const bool* completedParsing, Index* index) {
     std::cout << "processing begins" << std::endl;
-    unsigned int numOfThreads = 16;
+    unsigned int numOfThreads = 1;
     std::thread threads[numOfThreads];
 
     for(unsigned int i = 0; i < numOfThreads; i++) {
@@ -77,4 +76,12 @@ void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, c
 bool Processor::isStopWord(std::string word) {
     if(stopWords.count(word) > 0) return true;
     return false;
+}
+
+void Processor::stemWord(std::string& word) {
+    struct stemmer* z = create_stemmer();
+    char* word_c = (char*)word.c_str();
+    unsigned int x = stem(z, word_c, word.length() - 1);
+    word[x+1] = '\0';
+    word = word_c;
 }
