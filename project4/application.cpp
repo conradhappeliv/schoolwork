@@ -23,7 +23,7 @@ double solve_me(const double t) {
 
 int main() {
     // use root-finder to solve for the correct value of t
-    double time = steffensen(solve_me, 39000, 10000, 1e-6);
+    double time = steffensen(solve_me, 36000, 10000, 1e-6);
 
     // calculate different units for output
     int hours = time/3600;
@@ -34,4 +34,5 @@ int main() {
     std::cout << "Result: " << std::endl;
         std::cout << '\t' << std::setprecision(7) << std::fixed << time << " seconds" << std::endl;
         std::cout << '\t' << hours << " hours, " << minutes << " minutes, " << std::setprecision(7) << std::fixed << seconds << " seconds" << std::endl;
+        std::cout << '\t' << std::setprecision(3) << "carbon(" << depth << " m, " << time <<" s, " << temperature << " K) = " << carbon(depth, time, temperature, rtoler, atoler) << std::endl;
 }

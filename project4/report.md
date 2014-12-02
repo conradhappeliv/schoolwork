@@ -54,6 +54,18 @@ Code for this part:
 * ./application.cpp
 * ./steffensen.cpp (adapted from project 2)
 
+In this final section of the project, I used the carburization model from the previous section to find the time at which an alloy reaches a certain carbon concentration with other parameters fixed. Because the second MATH 3316 project required us to implement root-finding solvers, it would be easy for me to repurpose said solvers to solve this problem for me.
+
+Out of the Newton and Steffensen root-finders, I chose to use Steffensen's method because Newton's method requires a given derivative, and the carburization model seems very difficult to find the derivative. To make a valid root-solvable problem, I had to rearrange the problem as such (called `solve_me()` in `./application.cpp`):
+
+    carbon(.002 m, t, 1000 K) = .5%
+    f(t) = carbon(.002, t, 1000) - .005
+    solve f(t) = 0
+
+I needed to decide on an initial guess for the Steffensen solver to start at. Looking at the contour graphs for T = 900 K and 1100 K where x = 2 mm, it seems like a concentration of .5% occurs at about t = 20 hours and 0 hours, respectively. Because the problem's temperature of 1000 K falls between the temperatures of the two aforementioned models, I figured taking the average of the two eyeballed values of t would lead to a good guess. Therefore, I used t = 10 hours or 36000 seconds as the initial guess in the Steffensen solver.
+
+When solved using the Steffensen function, a result of 39079.0575545 seconds is found for the value of `t` (accurate to the microsecond). When plugged back into the model to check, it does indeed produce a resulting concentration of .5%, as I expected.
+
 
 Appendix A: Code Output
 -----------------------
