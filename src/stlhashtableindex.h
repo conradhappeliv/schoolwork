@@ -4,6 +4,7 @@
 #define STLHashTableIndex_H
 
 #include <unordered_map>
+#include <map>
 #include <mutex>
 
 #include "index.h"
@@ -17,9 +18,11 @@ public:
     virtual void load();
     virtual void clear();
     virtual void find(std::string);
+    virtual std::map<unsigned int, unsigned int> findAll(std::string);
 private:
     std::mutex tableLock;
     std::unordered_map<std::string, entry> table;
+    void addEntry(const entry);
 };
 
 #endif // STLHashTableIndex_H

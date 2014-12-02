@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <list>
+#include <map>
 
 #include "Page.h"
 
@@ -33,6 +34,7 @@ public:
     virtual void load() = 0;
     virtual void clear() = 0;
     virtual void find(std::string) = 0;
+    virtual std::map<unsigned int, unsigned int> findAll(std::string) = 0;
 
     std::string IDtoTitle(const unsigned int);
     std::string IDtoText(const unsigned int);
