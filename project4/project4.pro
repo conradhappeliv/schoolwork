@@ -10,7 +10,10 @@ SOURCES += \
     mat.cpp \
     adaptive_int.cpp \
     test_adapt.cpp \
-    carbon.cpp
+    carbon.cpp \
+    application.cpp \
+    test_carbon.cpp \
+    steffensen.cpp
 
 HEADERS += \
     mat.h

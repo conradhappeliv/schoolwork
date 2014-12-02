@@ -16,7 +16,7 @@ Code for this part:
 
 In this first section, I need to inplement an algorithm for approximating an integral with a convergence rate of at least h^7. I then wrote a test used to affirm that said implementation actually reaches that rate of convergence.
 
-After testing out a few different methods of composite numerical integration, I settled on _____, which allowed me to achieve the required rate of convergence while still maintaining the smallest necessary amount of computational effort. I was also able to use much smaller values of n than the given Gauss method because this method of numerical integration is able to converge much quicker than the methods with less nodes.
+After testing out a few different methods of composite numerical integration, I settled on the four-node Newton method explained in the textbook, which allowed me to achieve the required rate of convergence while still maintaining the smallest necessary amount of computational effort. I was also able to use much smaller values of n than the given Gauss method because this method of numerical integration is able to converge much quicker than the methods with less nodes.
 
 Part 2: Adaptive Numerical Integration
 ---------------------------------------
@@ -77,14 +77,14 @@ Appendix A: Code Output
     Composite Numerical Integration Approximation:
             6  6.4871424830042372e+01  2.5e-03     ----
            12  6.4958352643429464e+01  1.2e-03   1.108340
-           24  6.5034198198284500e+01  9.9e-06   6.861118
+           24  6.5034198198284486e+01  9.9e-06   6.861118
            36  6.5033499697655969e+01  7.9e-07   6.234199
            48  6.5033549618853030e+01  2.6e-08   11.820033
            60  6.5033551131199360e+01  3.2e-09   9.421540
-           72  6.5033551299509682e+01  6.5e-10   8.818505
-           84  6.5033551330378131e+01  1.7e-10   8.544760
-           96  6.5033551337990332e+01  5.7e-11   8.392412
-          108  6.5033551340287318e+01  2.1e-11   8.297426
+           72  6.5033551299509654e+01  6.5e-10   8.818501
+           84  6.5033551330378131e+01  1.7e-10   8.544765
+           96  6.5033551337990318e+01  5.7e-11   8.392383
+          108  6.5033551340287318e+01  2.1e-11   8.297458
 
 
 
@@ -97,27 +97,53 @@ Appendix A: Code Output
       1.0e-04 | 1.0e-07 |  40 |    95 | 6.503354e+01 |  1.2e-05  |   6.5e-03
       1.0e-06 | 1.0e-09 |  80 |   215 | 6.503355e+01 |  1.7e-08  |   6.5e-05
       1.0e-08 | 1.0e-11 | 160 |   455 | 6.503355e+01 |  5.6e-11  |   6.5e-07
-      1.0e-10 | 1.0e-13 | 320 |   935 | 6.503355e+01 |  2.1e-13  |   6.5e-09
-      1.0e-12 | 1.0e-15 | 320 |   935 | 6.503355e+01 |  2.1e-13  |   6.5e-11
+      1.0e-10 | 1.0e-13 | 320 |   935 | 6.503355e+01 |  2.0e-13  |   6.5e-09
+      1.0e-12 | 1.0e-15 | 320 |   935 | 6.503355e+01 |  2.0e-13  |   6.5e-11
     
 
 
 
 `./carbon.out`
 
-
+    no output
 
 
 `./application.out`
 
     Result: 
-    	39079.0574169 seconds
-    	10 hours, 51 minutes, 19.0574169 seconds
+    	39079.0574377 seconds
+    	10 hours, 51 minutes, 19.0574377 seconds
+    	carbon(0.002 m, 39079.057 s, 1000.000 K) = 0.005
 
 
 
 Appendix B: Code
 ----------------
+
+`./Makefile`
+
+    # Conrad Appel
+    # MATH 3316
+    # 2 Dec 2014
+    
+    all: test_int test_adapt carbon application
+    
+    test_int:
+    	g++ -std=c++11 test_int.cpp mat.cpp -o test_int.out
+    
+    test_adapt:
+    	g++ -std=c++11 test_adapt.cpp mat.cpp -o test_adapt.out
+    
+    carbon:
+    	g++ -std=c++11 test_carbon.cpp mat.cpp -o carbon.out
+    
+    application:
+    	g++ -std=c++11 application.cpp mat.cpp -o application.out
+    
+    clean:
+    	rm -f *.out *.txt *.png
+
+
 
 `./adaptive_int.cpp`
 
@@ -129,19 +155,21 @@ Appendix B: Code
     
     #include "composite_int.cpp"
     
+    // Approximates integral of f from [a, b], with a desired relative and absolute tolerance of rtol & atol
+    // stores result in R and final number of intervals in n, with total calculated intervals in nTot
     int adaptive_int(double (*f)(const double), const double a, const double b, const double rtol, const double atol, double& R, int& n, int& nTot) {
-        int k = 5;
-        n = 15;
+        int k = 5; // initial value of k
+        n = 15; // initial value of n
         double cur, next;
         next = composite_int(f, a, b, n);
         do {
-            if(n >= 10000000) return 1;
-            nTot += 2*n + k;
+            if(n >= 10000000) return 1; // convergence isn't happening fast enough or at all
+            nTot += 2*n + k; // accounts for both calculation of cur and next in this iteration
             cur = next;
-            n = n + k;
+            n = n + k; // increment n
             next = composite_int(f, a, b, n);
-            k = n;
-        } while(std::abs(next-cur) >= (rtol*std::abs(next) + atol));
+            k = n; // increase n by a proportion of itself
+        } while(std::abs(next-cur) >= (rtol*std::abs(next) + atol)); // compares error between iterations to desired accuracy
         R = next;
         return 0;
     }
@@ -158,7 +186,7 @@ Appendix B: Code
     #include "mat.h"
     #include "steffensen.cpp"
     
-    #include <iomanip>
+    #include <iomanip> // setprecision, fixed
     
     // problem constants
     const double rtoler = 1e-14;
@@ -167,21 +195,26 @@ Appendix B: Code
     const double temperature = 1e3; // Kelvin
     
     // t is the answer when this function
-    // is 0.
+    // is 0 (root-finding problem).
     // basically a reconfiguration of C(x, t, T) = .5%
     double solve_me(const double t) {
         return carbon(depth, t, temperature, rtoler, atoler)-.005;
     }
     
     int main() {
-        double time = steffensen(solve_me, 39000, 10000, 1e-6);
+        // use root-finder to solve for the correct value of t
+        double time = steffensen(solve_me, 36000, 10000, 1e-6);
+    
+        // calculate different units for output
         int hours = time/3600;
         int minutes = (time - hours*3600)/60;
         double seconds = time - hours*3600 - minutes*60;
     
+        // output
         std::cout << "Result: " << std::endl;
             std::cout << '\t' << std::setprecision(7) << std::fixed << time << " seconds" << std::endl;
             std::cout << '\t' << hours << " hours, " << minutes << " minutes, " << std::setprecision(7) << std::fixed << seconds << " seconds" << std::endl;
+            std::cout << '\t' << std::setprecision(3) << "carbon(" << depth << " m, " << time <<" s, " << temperature << " K) = " << carbon(depth, time, temperature, rtoler, atoler) << std::endl;
     }
 
 
@@ -197,29 +230,30 @@ Appendix B: Code
     
     #include <cmath>
     
+    // initial values for alloy
     const double C0 = .0025;
     const double Cs = .012;
     
     double erf(const double y, const double rtol, const double atol) {
         double R;
-        int n;
-        int nTot;
-        /*R = composite_int([](const double z){
-            return std::exp(-(z*z));
-        }, 0, y, 500);*/
-        adaptive_int([](const double z){
+        int n, nTot; // unused but necessary
+    
+        // integral of e^(-z^2) from 0 to y
+        adaptive_int([](const double z){ // lambda function representing e^(-z^2)
             return std::exp(-(z*z));
         }, 0, y, rtol, atol, R, n, nTot);
-        R *= 2.0/std::sqrt(PI);
+        R *= 2.0/std::sqrt(PI); // integral*2sqrt(pi)
         return R;
     }
     
+    // temp-dependent diffusion coefficient for steel
     double D(const double T) {
         return 6.2e-7*std::exp(-8e4/(8.31*T));
     }
     
+    // x = depth, t = time, T = temp, rtol/atol = relative/absolute tolerance for integration
     double carbon(double x, double t, const double T, const double rtol, const double atol) {
-        if(t <= 0) return C0;
+        if(t <= 0) return C0; // can't do negative sqrt & if t = 0, no diffusion has occured
         return Cs - (Cs-C0)*erf((x/std::sqrt(4*t*D(T))), rtol, atol);
     }
     
@@ -294,31 +328,44 @@ Appendix B: Code
 
 `./composite_int.cpp`
 
+    // Conrad Appel
+    // MATH 3316
+    // 2 Dec 2014
+    
     #include <cmath>
     
     #include "mat.h"
     
-    double newton4(double (*f)(const double), const double left, double h) {
-        double midpoint = left + h/2;
-        double x0, x1, x2, x3;
-        x0 = midpoint - .5*h * std::sqrt(1.0/7*(3 - 4 * std::sqrt(.3)));
-        x1 = midpoint - .5*h * std::sqrt(1.0/7*(3 + 4 * std::sqrt(.3)));
-        x2 = midpoint + .5*h * std::sqrt(1.0/7*(3 - 4 * std::sqrt(.3)));
-        x3 = midpoint + .5*h * std::sqrt(1.0/7*(3 + 4 * std::sqrt(.3)));
+    // all of these calculations moved outside functions for efficiency
+    const double node1 = std::sqrt(1.0/7*(3 - 4 * std::sqrt(.3))) * .5;
+    const double node2 = std::sqrt(1.0/7*(3 + 4 * std::sqrt(.3))) * .5;
+    const double weight1 = .5 + 1.0/12*std::sqrt(10.0/3);
+    const double weight2 = .5 - 1.0/12*std::sqrt(10.0/3);
     
-        return (  (.5 + 1.0/12*std::sqrt(10.0/3))*f(x0)
-                + (.5 - 1.0/12*std::sqrt(10.0/3))*f(x1)
-                + (.5 + 1.0/12*std::sqrt(10.0/3))*f(x2)
-                + (.5 - 1.0/12*std::sqrt(10.0/3))*f(x3))*h*.5;
+    double newton4(double (*f)(const double), const double left, double h) {
+        double midpoint = left + h/2; // of current subinterval
+        double x0, x1, x2, x3;
+        // calculate position of nodes
+        x0 = midpoint - h * node1;
+        x1 = midpoint - h * node2;
+        x2 = midpoint + h * node1;
+        x3 = midpoint + h * node2;
+    
+        // nodes * respective weights
+        return weight1*f(x0)
+              +weight2*f(x1)
+              +weight1*f(x2)
+              +weight2*f(x3);
     }
     
+    // integrates f from [a, b] with n subintervals
     double composite_int(double (*f)(const double), const double a, const double b, const int n) {
-        const double h = (b - a) / n;
-        double sum = 0;
+        const double h = (b - a) / n; // length of subinterval
+        double sum = 0; // sum of all subintervals
         for(unsigned int i = 0; i < n; i++) {
             sum += newton4(f, a + i*h, h);
         }
-        return sum;
+        return sum*h*.5;
     }
 
 
@@ -346,7 +393,7 @@ Appendix B: Code
             // find current df value using Steffensen's
             double df_of_x = (f_of_x - f(res - f_of_x))/f_of_x;
     
-            if(df_of_x == 0) break;
+            if(df_of_x == 0) break; // can't divide by 0
     
             // x(n+1) = x(n) - f(x(n))/f'(x(n))
             res = res - f_of_x/df_of_x;
@@ -392,15 +439,15 @@ Appendix B: Code
         double trueVal = 1.0 / c * (std::exp(c*b) - std::exp(c*a)) - 1.0 / d * (std::cos(d*b) - std::cos(d*a));
         printf("True integral value = %22.16e\n\n", trueVal);
     
+        // test values
         double rtols[] = { 1e-2, 1e-4, 1e-6, 1e-8, 1e-10, 1e-12 };
         double atols[] = { 1e-5, 1e-7, 1e-9, 1e-11, 1e-13, 1e-15 };
-        //adaptive_int(f, a, b, rtol, atol, R, n, nTot);
     
         std::cout << "    rtol     atol      n    nTot        R         |I(f)-R(f)|  rtol|I(f)|+atol" << std::endl;
         for(unsigned int i = 0; i < 6; i++) { // for each pair of tols
             double R;
             int n, nTot = 0;
-            int res = adaptive_int(f, a, b, rtols[i], atols[i], R, n, nTot);
+            adaptive_int(f, a, b, rtols[i], atols[i], R, n, nTot);
             double err = std::abs(trueVal - R);
             double errBound = rtols[i] * std::abs(trueVal) + atols[i];
             printf("  %2.1e | %2.1e | %3u | %5u | %12.6e |  %7.1e  |   %7.1e\n", rtols[i], atols[i], n, nTot, R, err, errBound);
@@ -418,20 +465,21 @@ Appendix B: Code
     
     #include "carbon.cpp"
     
+    // given
     const double rtoler = 1e-12;
     const double atoler = 1e-14;
     
     int main() {
         Mat x = Linspace(0, .004, 300); // m
         Mat t = Linspace(0, 172800, 500); // seconds
-        Mat c900 = Mat(300, 500);
-        Mat c1100 = Mat(300, 500);
-        Mat c900_1 = Mat(300);
+        Mat c900 = Mat(300, 500); // test one
+        Mat c1100 = Mat(300, 500); // test two
+        Mat c900_1 = Mat(300); // start of test three
         Mat c900_6 = Mat(300);
         Mat c900_12 = Mat(300);
         Mat c900_24 = Mat(300);
         Mat c900_48 = Mat(300);
-        Mat c1100_1 = Mat(300);
+        Mat c1100_1 = Mat(300); // start of test four
         Mat c1100_6 = Mat(300);
         Mat c1100_12 = Mat(300);
         Mat c1100_24 = Mat(300);
@@ -441,52 +489,42 @@ Appendix B: Code
         for(unsigned int i = 0; i < 300; i++)
             for(unsigned int j = 0; j < 500; j++)
                 c900(i, j) = carbon(x(i), t(j), 900, rtoler, atoler);
-    
         // c1100
         for(unsigned int i = 0; i < 300; i++)
             for(unsigned int j = 0; j < 500; j++)
                 c1100(i, j) = carbon(x(i), t(j), 1100, rtoler, atoler);
-    
         // c900_1hour
         for(unsigned int i = 0; i < 300; i++)
             c900_1(i) = carbon(x(i), 3600, 900, rtoler, atoler);
-    
         // c900_6hour
         for(unsigned int i = 0; i < 300; i++)
             c900_6(i) = carbon(x(i), 21600, 900, rtoler, atoler);
-    
         // c900_12hour
         for(unsigned int i = 0; i < 300; i++)
             c900_12(i) = carbon(x(i), 43200, 900, rtoler, atoler);
-    
         // c900_24hour
         for(unsigned int i = 0; i < 300; i++)
             c900_24(i) = carbon(x(i), 86400, 900, rtoler, atoler);
-    
         // c900_48hour
         for(unsigned int i = 0; i < 300; i++)
             c900_48(i) = carbon(x(i), 172800, 900, rtoler, atoler);
-    
         // c1100_1hour
         for(unsigned int i = 0; i < 300; i++)
             c1100_1(i) = carbon(x(i), 3600, 1100, rtoler, atoler);
-    
         // c1100_6hour
         for(unsigned int i = 0; i < 300; i++)
             c1100_6(i) = carbon(x(i), 21600, 1100, rtoler, atoler);
-    
         // c1100_12hour
         for(unsigned int i = 0; i < 300; i++)
             c1100_12(i) = carbon(x(i), 43200, 1100, rtoler, atoler);
-    
         // c1100_24hour
         for(unsigned int i = 0; i < 300; i++)
             c1100_24(i) = carbon(x(i), 86400, 1100, rtoler, atoler);
-    
         // c1100_48hour
         for(unsigned int i = 0; i < 300; i++)
             c1100_48(i) = carbon(x(i), 172800, 1100, rtoler, atoler);
     
+        // write to files
         x.Write("./x.txt");
         t.Write("./t.txt");
         c900.Write("./c900.txt");
@@ -564,15 +602,25 @@ Appendix B: Code
 Appendix C: Plots
 -----------------
 
-![](/home/conrad/Development/MATH3316/project4/c1100.png)
-Figure 1:
-
-![](/home/conrad/Development/MATH3316/project4/c1100_fixedt.png)
-Figure 2:
-
 ![](/home/conrad/Development/MATH3316/project4/c900.png)
-Figure 3:
+Figure 1: Contour plot showing the carbon concentration in an alloy over time or at different depths with a fixed temperature of 900 K.
+
+Note that on the surface of the steal, the carbon concentration approaches that of the gas almost instantly whereas it takes longer for the carbon to percolate the greater depths of the steel.
+
+![](/home/conrad/Development/MATH3316/project4/c1100.png)
+Figure 2: Contour plot showing the carbon concentration in an alloy over time or at different depths with a fixed temperature of 1100 K.
+
+Comparing figure 1 and figure 2, it seems that with a greater temperature, the carbon diffuses down deeper into the steel much more quickly. This is due to the temperature-dependent diffusion coefficient for steel becoming larger as T becomes larger.
 
 ![](/home/conrad/Development/MATH3316/project4/c900_fixedt.png)
-Figure 4:
+Figure 3: Carbon concentrations with varying depths, fixed times along individual lines, and a fixed temperature of 900 K.
+
+Looking at this graph, it's obvious that carbon concentrations in the steel are always closer to that of the gas the more time has passed (visually, the lines with greater times are always above those with less time).
+
+![](/home/conrad/Development/MATH3316/project4/c1100_fixedt.png)
+Figure 4: Carbon concentrations with varying depths, fixed times along individual lines, and a fixed temperature of 1100 K.
+
+Once again comparing this and the previous graph, the trials with greater temperatures more quickly approaches the gas's concentration (the same lines in this trial are higher than in the previous trial).
+
+
 

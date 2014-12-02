@@ -21,8 +21,8 @@ for app in ['./test_int.out', './test_adapt.out', './carbon.out', './application
 
 outfile.write('Appendix B: Code\n')
 outfile.write('----------------\n\n')
-for filename in sorted(glob.glob('./*.*')):
-    if not (filename.endswith('.py') or filename.endswith('.cpp')):
+for filename in sorted(glob.glob('./*')):
+    if not (filename.endswith('.py') or filename.endswith('.cpp') or (filename == './Makefile')):
         continue
     if filename == './mat.cpp' or filename == './filestoreport.py' or filename == './composite_Gauss2.cpp':
         continue
