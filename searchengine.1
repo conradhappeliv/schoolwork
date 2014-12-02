@@ -1,0 +1,32 @@
+./ Owner: Conrad Appel
+.TH SEARCHENGINE(1)
+.SH NAME
+searchengine \- create an index of all wikibook entries and allow user search of index
+.SH SYNOPSIS
+.B searchengine
+mode [options]
+.SH MODES
+.SS -m / --maintenance
+add files to, clear, or open index
+.IP "-f filename"
+add file to index
+.IP -c
+clear index
+.IP -o
+open index (test function - no functionality)
+.SS -i / --interactive
+loads index into memory and allows user searches
+.IP -a
+use an AVL Tree index
+.IP -t
+use a hash table index [DEFAULT]
+.SS -s / --stresstest
+run a set of commands from a file
+.IP "-f filename"
+filename from which to load commands
+.SS -h / --help
+shows this man page
+.SH AUTHORS
+.IP "\fBConrad Appel\fR (\fIcappel@smu.edu\fR)"
+Second year B.S. Computer Engineering student at Southern Methodist University.
+.IP "\fBEdward Li\fR (\fIeli@smu.edu\fR)"

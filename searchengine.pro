@@ -41,3 +41,6 @@ HEADERS += src/index.h \
     src/queryprocessor.h \
     src/avltree.h \
     src/stlhashtableindex.h
+
+OTHER_FILES += \
+    searchengine.1

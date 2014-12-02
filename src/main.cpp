@@ -20,6 +20,10 @@ enum indextypes {
     HASHTABLE
 };
 
+const std::string indexpath = "./default.index";
+
+
+
 int main(int argc, char* argv[])
 {
     int mode = HELP; // default mode
@@ -38,7 +42,7 @@ int main(int argc, char* argv[])
         std::string filepath;
         if(ops >> GetOpt::Option('f', "filename", filepath)) { // add file to index
             std::thread threads[2];
-            Index* index = new STLHashTableIndex("./default.index");
+            Index* index = new STLHashTableIndex(indexpath);
             XMLParser parser(filepath, index);
 
             threads[0] = std::thread([&]() {
@@ -52,13 +56,15 @@ int main(int argc, char* argv[])
 
             index->save();
         } else if(ops >> GetOpt::OptionPresent('c', "clear")){ // clear index
-            Index* index = new STLHashTableIndex("./default.index");
+            Index* index = new STLHashTableIndex(indexpath);
             index->clear();
         } else if(ops >> GetOpt::OptionPresent('o', "open")) { // open index file TEST FUNCTIONALITY
-            Index* index = new STLHashTableIndex("./default.index");
+            Index* index = new STLHashTableIndex(indexpath);
             index->load();
         } else { // show help relevant to maintenance mode
-
+            std::cout << "-f [filename] add file to index" << std::endl
+                      << "-c            clear index" << std::endl
+                      << "-o            load index (used for testing - no functional purpose)" << std::endl;
         }
     } else if(mode == INTERACTIVE) {
         std::cout << "~~~ INTERACTIVE MODE ~~~" << std::endl;
@@ -72,11 +78,11 @@ int main(int argc, char* argv[])
             // declare new AVLTreeIndex
         } else if(ops >> GetOpt::Option('t', "hashtable", filepath)) {
             indexType = HASHTABLE;
-            index = new STLHashTableIndex("./default.index");
+            index = new STLHashTableIndex(indexpath);
             index->load();
 /*
             std::thread threads[2];
-            Index* index = new STLHashTableIndex("./default.index");
+            Index* index = new STLHashTableIndex(indexpath);
             XMLParser parser(filepath, index);
 
             threads[0] = std::thread([&]() {
@@ -115,8 +121,7 @@ int main(int argc, char* argv[])
 
         }
     } else if(mode == HELP) {
-        std::cout << "~~~ HELP ~~~" << std::endl;
-
+        system("man -l ../searchengine.1");
     }
 
     return 0;
