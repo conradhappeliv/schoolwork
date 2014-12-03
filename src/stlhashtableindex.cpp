@@ -25,7 +25,7 @@ void STLHashTableIndex::save() {
     if (!fout.is_open()) {
         std::cout << "Error opening " << filename << std::endl;
         exit(1);
-    } else {std::cout << filename << " successfully opened." << std::endl;}
+    }
 
     // write out all data to file
     for (auto i = table.begin(); i != table.end(); i++) {
@@ -48,7 +48,7 @@ void STLHashTableIndex::load() {
     if (!fin.is_open()) {
         std::cout << "Error opening " << filename << std::endl;
         exit(1);
-    } else {std::cout << filename << " successfully opened." << std::endl;}
+    }
 
     // read in index from file
     while (!fin.eof()) {

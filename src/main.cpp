@@ -8,6 +8,7 @@
 #include "src/index.h"
 #include "src/queryprocessor.h"
 #include "src/stlhashtableindex.h"
+#include "src/stresstest.h"
 
 enum modes {
     MAINTENANCE,
@@ -116,7 +117,7 @@ int main(int argc, char* argv[])
         std::cout << "~~~ STRESS TEST MODE ~~~" << std::endl;
         std::string filepath;
         if(ops >> GetOpt::Option('f', "filename", filepath)) { // run commands
-
+            StressTest test_it(filepath);
         } else { // show stress-test mode help
 
         }

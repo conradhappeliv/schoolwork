@@ -29,7 +29,8 @@ SOURCES += src/main.cpp \
     src/hashtableindex.cpp\
     src/avltreeindex.cpp\
     src/queryprocessor.cpp \
-    src/stlhashtableindex.cpp
+    src/stlhashtableindex.cpp \
+    src/stresstest.cpp
 
 HEADERS += src/index.h \
     lib/getopt_pp.h\
@@ -40,7 +41,8 @@ HEADERS += src/index.h \
     src/hashtableindex.h\
     src/queryprocessor.h \
     src/avltree.h \
-    src/stlhashtableindex.h
+    src/stlhashtableindex.h \
+    src/stresstest.h
 
 OTHER_FILES += \
     searchengine.1

@@ -3,7 +3,7 @@
 .SH NAME
 searchengine \- create an index of all wikibook entries and allow user search of index
 .SH SYNOPSIS
-.B searchengine
+.B ./searchengine
 mode [options]
 .SH MODES
 .SS -m / --maintenance
@@ -24,6 +24,26 @@ use a hash table index [DEFAULT]
 run a set of commands from a file
 .IP "-f filename"
 filename from which to load commands
+.IP AV
+selects AVL Tree for index data structure
+.IP HT
+selects Hash Table for index data structure
+.IP ST
+starts timer
+.IP EN
+stops timer & displays total time
+.IP RM
+clears index
+.IP "OP [filepath]"
+opens index stored at \fIfilepath\fR
+.IP CL
+saves & closes index
+.IP "LD [filepath]"
+indexes file stored at \fIfilepath\fR
+.IP "QU [...]"
+runs specified query through the query processor
+.IP "PN [pageid]"
+shows the contents of page with specified \fIpageid\fR
 .SS -h / --help
 shows this man page
 .SH AUTHORS
