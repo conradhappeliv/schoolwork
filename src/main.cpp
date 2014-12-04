@@ -42,19 +42,12 @@ int main(int argc, char* argv[])
         std::cout << "~~~ MAINTENANCE MODE ~~~" << std::endl;
         std::string filepath;
         if(ops >> GetOpt::Option('f', "filename", filepath)) { // add file to index
-            std::thread threads[2];
             Index* index = new STLHashTableIndex(indexpath);
+            if(ops >> GetOpt::OptionPresent('a', "append")) {
+                index->load();
+            }
             XMLParser parser(filepath, index);
-
-            threads[0] = std::thread([&]() {
-                parser.parse();
-            });
-            threads[1] = std::thread([&]() {
-                parser.beginProcessing();
-            });
-            threads[0].join();
-            threads[1].join();
-
+            parser.threadedParseAndProcess();
             index->save();
         } else if(ops >> GetOpt::OptionPresent('c', "clear")){ // clear index
             Index* index = new STLHashTableIndex(indexpath);

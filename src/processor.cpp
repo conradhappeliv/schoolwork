@@ -18,7 +18,7 @@ Processor::Processor() {}
 
 void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const bool* completedParsing, Index* index) {
     struct stemmer* z = create_stemmer();
-    while(!toBeProcessed->empty() || !*completedParsing) {
+    while(!toBeProcessed->empty() || !*completedParsing) { // TODO: change empty() to something more performant (maybe condition variable or something)
         if(!toBeProcessed->empty()) {
             TBPLock->lock();
             Page* page;
@@ -61,7 +61,7 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
 
 void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, const bool* completedParsing, Index* index) {
     std::cout << "processing begins" << std::endl;
-    unsigned int numOfThreads = 1;
+    unsigned int numOfThreads = 10;
     std::thread threads[numOfThreads];
 
     for(unsigned int i = 0; i < numOfThreads; i++) {

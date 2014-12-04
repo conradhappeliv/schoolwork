@@ -17,6 +17,7 @@ public:
     void parse();
     bool complete();
     void beginProcessing();
+    void threadedParseAndProcess();
 private:
     std::string filename;
     Index* index;

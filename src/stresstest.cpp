@@ -4,6 +4,7 @@
 #include "index.h"
 #include "stlhashtableindex.h"
 #include "avltreeindex.h"
+#include "xmlparser.h"
 
 #include <iostream>
 #include <sstream>
@@ -24,6 +25,7 @@ StressTest::StressTest(std::string filename) {
             else {
                 start = std::chrono::system_clock::now();
                 timer_running = true;
+                std::cout << "Timer started." << std::endl;
             }
         }
         else if(opcode == "EN") { // end timer, output time between
@@ -31,9 +33,9 @@ StressTest::StressTest(std::string filename) {
             else {
                 stop = std::chrono::system_clock::now();
                 auto diff = stop - start;
-                //auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+                auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
                 auto s = std::chrono::duration_cast<std::chrono::seconds>(diff).count();
-                std::cout << "Timer output: " << s << " seconds" << std::endl;
+                std::cout << "Timer stopped: " << (int) ms/1000 << " seconds, " << (int)ms%1000 << " milliseconds" << std::endl;
                 timer_running = false;
             }
         }
@@ -74,15 +76,17 @@ StressTest::StressTest(std::string filename) {
             else {
                 std::string filename;
                 line_stream >> filename;
+                XMLParser parser(filename, index);
+                parser.threadedParseAndProcess();
                 std::cout << filename <<" loaded into index." << std::endl;
-                index_changed = false;
+                index_changed = true;
             }
         }
         else if(opcode == "QU") { // run query on index
             if(!index_open) std::cout << "No index open to query." << std::endl;
             else {
                 line.erase(0, 3); // just keep query from here on out
-
+                // TODO
             }
         }
         else if(opcode == "AV") { // select avl tree
@@ -90,7 +94,7 @@ StressTest::StressTest(std::string filename) {
                 std::cout << "Can't select AVL Tree. Index in use already!" << std::endl;
             } else {
                 index_type = AVLTREE;
-                std::cout << "Index type set to AVL Tree" << std::endl;
+                std::cout << "Index type set to AVL Tree." << std::endl;
             }
         }
         else if(opcode == "HT") { // select hash table
@@ -98,13 +102,15 @@ StressTest::StressTest(std::string filename) {
                 std::cout << "Can't select Hash table. Index in use already!" << std::endl;
             } else {
                 index_type = HASHTABLE;
-                std::cout << "Index type set to Hash Table" << std::endl;
+                std::cout << "Index type set to Hash Table." << std::endl;
             }
         }
         else if(opcode == "PN") { // retrieve page number
             if(!index_open) std::cout << "No index open to retrieve from." << std::endl;
             else {
-
+                unsigned int id;
+                line_stream >> id;
+                std::cout << "Page ID " << id << ": " << index->IDtoTitle(id) << std::endl;
             }
         }
     }

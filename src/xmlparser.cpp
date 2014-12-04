@@ -5,6 +5,7 @@
 #include <mutex>
 #include <libxml++/libxml++.h>
 #include <libxml++/parsers/textreader.h>
+#include <thread>
 
 #include "Page.h"
 #include "xmlparser.h"
@@ -67,4 +68,16 @@ bool XMLParser::complete() {
 void XMLParser::beginProcessing() {
     while(finished);
     Processor::process(toBeProcessed, TBPLock, &finished, index);
+}
+
+void XMLParser::threadedParseAndProcess() {
+    std::thread threads[2];
+    threads[0] = std::thread([&]() {
+        parse();
+    });
+    threads[1] = std::thread([&]() {
+        beginProcessing();
+    });
+    threads[0].join();
+    threads[1].join();
 }
