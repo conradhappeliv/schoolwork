@@ -124,16 +124,10 @@ void STLHashTableIndex::find(std::string searchTerm) {
 
 // id -> freq
 std::map<unsigned int, unsigned int> STLHashTableIndex::findAll(std::string keyword) { // TODO: refactor without exceptions
-    try {
-        entry& e = table.at(keyword);
-        std::map<unsigned int, unsigned int> theMap;
-        for(auto it = e.documents.begin(); it != e.documents.end(); it++) theMap[it->id] = it->termFreq;
-        return theMap;
-    } catch(std::out_of_range) {
-        std::cout << "Keyword doesn't exist" << std::endl;
-        std::map<unsigned int, unsigned int> theMap;
-        return theMap;
-    }
+    entry& e = table[keyword];
+    std::map<unsigned int, unsigned int> theMap;
+    for(auto it = e.documents.begin(); it != e.documents.end(); it++) theMap[it->id] = it->termFreq;
+    return theMap;
 }
 
 void STLHashTableIndex::addEntry(const entry e) {

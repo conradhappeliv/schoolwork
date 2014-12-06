@@ -122,6 +122,7 @@ int main(int argc, char* argv[])
                 } else std::cout << display_me << std::endl;
             } else {
                 auto results = query_me.processQuery(query);
+                if(results.size() == 0) std::cout << "No results." << std::endl;
                 for(auto it = results.begin(); it != results.end(); it++) {
                     std::cout << *it << ": " << index->IDtoTitle(*it) << std::endl;
                 }
