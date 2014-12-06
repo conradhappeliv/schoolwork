@@ -82,3 +82,10 @@ void XMLParser::threadedParseAndProcess() {
     threads[0].join();
     threads[1].join();
 }
+
+void XMLParser::addDocsNoProcessing() {
+    while(!toBeProcessed.empty()) {
+        index->addDoc(toBeProcessed.top()->id, toBeProcessed.top());
+        toBeProcessed.pop();
+    }
+}

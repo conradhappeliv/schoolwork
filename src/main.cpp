@@ -86,17 +86,40 @@ int main(int argc, char* argv[])
         while (true) {
             char q[100000];
 
-            std::cout << "Please enter a search query, \"retrieve [page_id]\", or \"quit\": ";
+            std::cout << "Please enter a search query, \"retrieve[all] [page_id]\", or \"exit\": ";
             std::cin.getline(q, 100000);
             std::string query(q);
             if (query == "exit") break;
             else if(query.compare(0, 8, "retrieve") == 0) {
-                std::string display_me = query.substr(9, std::string::npos);
+                bool all = false;
+                unsigned int offset = 9;
+                if(query.compare(8, 3, "all") == 0) {
+                    all = true;
+                    offset += 3;
+                }
+                std::string display_me = query.substr(offset, std::string::npos);
                 unsigned int page_id = std::atoi(display_me.c_str());
                 display_me += ": ";
-                display_me += index->IDtoTitle(page_id) + '\n';
-                display_me += index->IDtoText(page_id);
-                std::cout << display_me << std::endl;
+                try {
+                    display_me += index->IDtoTitle(page_id) + '\n';
+                    display_me += index->IDtoText(page_id);
+                } catch (std::invalid_argument) {
+                    std::cout << "Page not in index" << std::endl;
+                    continue;
+                }
+                if(!all && display_me.length() > 4096) {
+                    display_me.erase(4096);
+                    std::cout << display_me << std::endl;
+                    std::cout << std::endl << "------------------------------------" << std::endl;
+                    std::cout << "Type \"retrieveall " << page_id << "\" to see the entire contents." << std::endl;
+                } else if(all) {
+                    char* temp_filename = "./temp";
+                    std::ofstream temp_file(temp_filename);
+                    temp_file << display_me;
+                    temp_file.close();
+                    system("less ./temp");
+                    remove(temp_filename);
+                } else std::cout << display_me << std::endl;
             } else {
                 auto results = query_me.processQuery(query);
                 for(auto it = results.begin(); it != results.end(); it++) {

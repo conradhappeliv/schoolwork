@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <thread>
 
 STLHashTableIndex::STLHashTableIndex(std::string filename):Index(filename) {
     table.reserve(1000000);
@@ -64,6 +65,12 @@ void STLHashTableIndex::load() {
 
     // read in index from file
     std::getline(fin, indexReferenced);
+    std::thread parse = std::thread([&]() {
+        XMLParser parser(indexReferenced, this);
+        parser.parse();
+        parser.addDocsNoProcessing();
+    });
+
     while (!fin.eof()) {
         entry e;
         std::string keyword_in, idf_in, str_in, id_in, tf_in;
@@ -92,6 +99,7 @@ void STLHashTableIndex::load() {
         //std::cout << std::endl;
     }
     fin.close();
+    parse.join();
 }
 
 void STLHashTableIndex::clear() {
