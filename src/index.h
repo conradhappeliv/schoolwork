@@ -24,10 +24,12 @@ protected:
         std::vector<doc> documents;
         double idf = 0;
     };
+    std::string indexReferenced;
 public:
     Index(std::string filen):filename(filen) {
         pages.reserve(256279);
     }
+    void setIndexFile(std::string filen) { indexReferenced = filen; }
     virtual void add(const unsigned int, const std::string, const unsigned int) = 0;
     void addDoc(const unsigned int, Page*);
     virtual void save() = 0;

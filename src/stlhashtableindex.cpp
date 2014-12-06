@@ -1,8 +1,11 @@
 // Owner: Edward Li
 
 #include "stlhashtableindex.h"
+#include "xmlparser.h"
+
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 
 STLHashTableIndex::STLHashTableIndex(std::string filename):Index(filename) {
     table.reserve(1000000);
@@ -27,9 +30,17 @@ void STLHashTableIndex::save() {
         exit(1);
     }
 
+    // get cwd
+    if(indexReferenced[0] != '/') {
+        indexReferenced.insert(0, "/");
+        char c[PATH_MAX];
+        getcwd(c, PATH_MAX);
+        indexReferenced.insert(0, c);
+    }
+
     // write out all data to file
+    fout << indexReferenced << std::endl;
     for (auto i = table.begin(); i != table.end(); i++) {
-        // format: keyword;idf;id,freq;id,freq;id,freq;
         fout << i->first << ";";
         fout << i->second.idf << ";";
         for (auto j = i->second.documents.begin(); j != i->second.documents.end(); j++) {
@@ -52,6 +63,7 @@ void STLHashTableIndex::load() {
     }
 
     // read in index from file
+    std::getline(fin, indexReferenced);
     while (!fin.eof()) {
         entry e;
         std::string keyword_in, idf_in, str_in, id_in, tf_in;

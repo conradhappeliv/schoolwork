@@ -66,6 +66,7 @@ bool XMLParser::complete() {
 }
 
 void XMLParser::beginProcessing() {
+    index->setIndexFile(filename);
     while(finished);
     Processor::process(toBeProcessed, TBPLock, &finished, index);
 }
