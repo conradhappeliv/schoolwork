@@ -82,6 +82,8 @@ void Processor::prepareWord(std::string& word) {
 }
 
 void Processor::prepareWord(std::string& word, struct stemmer* theStemmer) {
+    std::transform(word.begin(), word.end(), word.begin(), tolower);
+
     // remove stop words
     if(Processor::isStopWord(word)) {
         word = "";

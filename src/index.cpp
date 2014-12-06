@@ -13,5 +13,7 @@ std::string Index::IDtoTitle(const unsigned int id) {
 }
 
 std::string Index::IDtoText(const unsigned int id) {
-    return pages[id]->body;
+    Page* page = pages[id];
+    if(page == nullptr) return "PageContentsNotLoaded"; // TODO;
+    return page->body;
 }

@@ -21,9 +21,7 @@ enum indextypes {
     HASHTABLE
 };
 
-const std::string indexpath = "./default.index";
-
-
+std::string indexpath = "./default.index";
 
 int main(int argc, char* argv[])
 {
@@ -31,10 +29,11 @@ int main(int argc, char* argv[])
 
     // mode option parsing
     GetOpt::GetOpt_pp ops(argc, argv);
-    if(ops >> GetOpt::OptionPresent('m', "maintenance")) mode = MAINTENANCE;
+
+    if(ops >> GetOpt::OptionPresent('h', "help")) mode = HELP;
     else if(ops >> GetOpt::OptionPresent('i', "interactive")) mode = INTERACTIVE;
     else if(ops >> GetOpt::OptionPresent('s', "stresstest")) mode = STRESS;
-    else if(ops >> GetOpt::OptionPresent('h', "help")) mode = HELP;
+    else if(ops >> GetOpt::OptionPresent('m', "maintenance")) mode = MAINTENANCE;
     else mode = HELP;
 
     // optparsing and execution specific to modes
@@ -56,9 +55,7 @@ int main(int argc, char* argv[])
             Index* index = new STLHashTableIndex(indexpath);
             index->load();
         } else { // show help relevant to maintenance mode
-            std::cout << "-f [filename] add file to index" << std::endl
-                      << "-c            clear index" << std::endl
-                      << "-o            load index (used for testing - no functional purpose)" << std::endl;
+            std::cout << "Invalid usage. \"./searchengine --help\" for usage instructions." << std::endl;
         }
     } else if(mode == INTERACTIVE) {
         std::cout << "~~~ INTERACTIVE MODE ~~~" << std::endl;
@@ -74,8 +71,11 @@ int main(int argc, char* argv[])
             indexType = HASHTABLE;
         }
 
+        // user-defined index file if they want
+        ops >> GetOpt::Option('p', "indexpath", indexpath);
+
         if(indexType == HASHTABLE) index = new STLHashTableIndex(indexpath);
-        // else if(indexType == AVLTREE) index =
+        // else if(indexType == AVLTREE) index = TODO:
         std::cout << "Loading " << indexpath << std::endl;
         index->load();
         std::cout << "Index loaded." << std::endl;
@@ -86,22 +86,31 @@ int main(int argc, char* argv[])
         while (true) {
             char q[100000];
 
-            std::cout << "Please enter a search query: ";
+            std::cout << "Please enter a search query, \"retrieve [page_id]\", or \"quit\": ";
             std::cin.getline(q, 100000);
             std::string query(q);
             if (query == "exit") break;
-            auto results = query_me.processQuery(query);
-            for(auto it = results.begin(); it != results.end(); it++) {
-                std::cout << *it << ": " << index->IDtoTitle(*it) << std::endl;
+            else if(query.compare(0, 8, "retrieve") == 0) {
+                std::string display_me = query.substr(9, std::string::npos);
+                unsigned int page_id = std::atoi(display_me.c_str());
+                display_me += ": ";
+                display_me += index->IDtoTitle(page_id) + '\n';
+                display_me += index->IDtoText(page_id);
+                std::cout << display_me << std::endl;
+            } else {
+                auto results = query_me.processQuery(query);
+                for(auto it = results.begin(); it != results.end(); it++) {
+                    std::cout << *it << ": " << index->IDtoTitle(*it) << std::endl;
+                }
             }
         }
     } else if(mode == STRESS) {
         std::cout << "~~~ STRESS TEST MODE ~~~" << std::endl;
         std::string filepath;
-        if(ops >> GetOpt::Option('f', "filename", filepath)) { // run commands
+        if(ops >> GetOpt::GlobalOption(filepath)) { // run commands
             StressTest test_it(filepath);
         } else { // show stress-test mode help
-
+            std::cout << "Must specify a filename of a test." << std::endl;
         }
     } else if(mode == HELP) {
         system("man -l ../searchengine.1");

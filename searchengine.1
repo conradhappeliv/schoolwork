@@ -16,14 +16,14 @@ clear index
 open index (test function - no functionality)
 .SS -i / --interactive
 loads index into memory and allows user searches
+.IP -i
+specify a custom index file to load
 .IP -a
 use an AVL Tree index
 .IP -t
 use a hash table index [DEFAULT]
-.SS -s / --stresstest
-run a set of commands from a file
-.IP "-f filename"
-filename from which to load commands
+.SS -s / --stresstest [filename]
+run a set of commands from filename
 .IP AV
 selects AVL Tree for index data structure
 .IP HT
