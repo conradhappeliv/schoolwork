@@ -31,19 +31,27 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
             TBPLock->unlock();
             std::istringstream stream(page->body);
             std::string word;
-            std::unordered_map<std::string, unsigned int> frequencies;
+            std::unordered_map<std::string, double> frequencies;
             while(stream >> word) {
                 Processor::prepareWord(word, z);
                 if(word == "") continue;
 
                 // calculate frequencies
-                if(frequencies.count(word) > 0) frequencies[word] = frequencies[word] + 1;
-                else frequencies[word] = 1;
+                frequencies[word]++;
+                /*if(frequencies.count(word) > 0) frequencies[word] = frequencies[word] + 1;
+                else frequencies[word] = 1;*/
             }
+
+            // find max_frequency for augmented frequency
+            unsigned int max_freq = 0;
+            for(auto i = frequencies.begin(); i != frequencies.end(); i++) if(i->second > max_freq) max_freq = i->second;
+
+            // calculate TF and add to index
             for(auto i = frequencies.begin(); i != frequencies.end(); i++) {
+                i->second = .5 + (.5*i->second/max_freq); // calculating augmented frequency
                 index->add(page->id, i->first, i->second);
             }
-            index->addDoc(page->id, page);
+            index->addDoc(page->id, page); // add page contents
         }
     }
     free_stemmer(z);

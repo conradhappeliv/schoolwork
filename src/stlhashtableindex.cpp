@@ -12,7 +12,7 @@ STLHashTableIndex::STLHashTableIndex(std::string filename):Index(filename) {
     table.reserve(1000000);
 }
 
-void STLHashTableIndex::add(const unsigned int id, const std::string word, const unsigned int freq) {
+void STLHashTableIndex::add(const unsigned int id, const std::string word, const double freq) {
     entry::doc d;
     d.id = id;
     d.termFreq = freq;
@@ -43,7 +43,6 @@ void STLHashTableIndex::save() {
     fout << indexReferenced << std::endl;
     for (auto i = table.begin(); i != table.end(); i++) {
         fout << i->first << ";";
-        fout << i->second.idf << ";";
         for (auto j = i->second.documents.begin(); j != i->second.documents.end(); j++) {
             fout << j->id << ",";
             fout << j->termFreq << ";";
@@ -73,12 +72,9 @@ void STLHashTableIndex::load() {
 
     while (!fin.eof()) {
         entry e;
-        std::string keyword_in, idf_in, str_in, id_in, tf_in;
+        std::string keyword_in, id_in, tf_in;
         std::getline(fin, keyword_in, ';');
-        std::getline(fin, idf_in, ';');
         e.keyword = keyword_in;
-        e.idf = std::atoi(idf_in.c_str());
-        //std::cout << keyword_in << ";" << idf_in << ";";
 
         bool val = true;
         while(val) {
@@ -122,11 +118,12 @@ void STLHashTableIndex::find(std::string searchTerm) {
     else std::cout << "search term not found\n";
 }
 
-// id -> freq
-std::map<unsigned int, unsigned int> STLHashTableIndex::findAll(std::string keyword) { // TODO: refactor without exceptions
+// id -> tfidf
+std::map<unsigned int, double> STLHashTableIndex::findAll(std::string keyword) { // TODO: refactor without exceptions
     entry& e = table[keyword];
-    std::map<unsigned int, unsigned int> theMap;
-    for(auto it = e.documents.begin(); it != e.documents.end(); it++) theMap[it->id] = it->termFreq;
+    std::map<unsigned int, double> theMap;
+    double idf = calcIDF(table.size(), e.documents.size());
+    for(auto it = e.documents.begin(); it != e.documents.end(); it++) theMap[it->id] = calcTFIDF(it->termFreq, idf);
     return theMap;
 }
 

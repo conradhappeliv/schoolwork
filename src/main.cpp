@@ -126,6 +126,7 @@ int main(int argc, char* argv[])
                 for(auto it = results.begin(); it != results.end(); it++) {
                     std::cout << *it << ": " << index->IDtoTitle(*it) << std::endl;
                 }
+                std::cout << std::endl << std::endl;
             }
         }
     } else if(mode == STRESS) {

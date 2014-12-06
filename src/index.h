@@ -22,24 +22,27 @@ protected:
         };
         std::string keyword;
         std::vector<doc> documents;
-        double idf = 0;
     };
     std::string indexReferenced;
+
+    static double calcTFIDF(double, double);
+    static double calcIDF(unsigned int, unsigned int);
 public:
     Index(std::string filen):filename(filen) {
         pages.reserve(256279);
     }
     void setIndexFile(std::string filen) { indexReferenced = filen; }
-    virtual void add(const unsigned int, const std::string, const unsigned int) = 0;
+    virtual void add(const unsigned int, const std::string, const double) = 0;
     void addDoc(const unsigned int, Page*);
     virtual void save() = 0;
     virtual void load() = 0;
     virtual void clear() = 0;
     virtual void find(std::string) = 0;
-    virtual std::map<unsigned int, unsigned int> findAll(std::string) = 0;
+    virtual std::map<unsigned int, double> findAll(std::string) = 0;
 
-    std::string IDtoTitle(const unsigned int);
-    std::string IDtoText(const unsigned int);
+    const std::string IDtoTitle(const unsigned int);
+    const std::string IDtoText(const unsigned int);
+    const Page* IDtoPage(const unsigned int);
 private:
     struct pageContents {
         pageContents() {}
