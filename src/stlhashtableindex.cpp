@@ -47,7 +47,8 @@ void STLHashTableIndex::load() {
     fin.open(filename);
     if (!fin.is_open()) {
         std::cout << "Error opening " << filename << std::endl;
-        exit(1);
+        //exit(1);
+        return;
     }
 
     // read in index from file
@@ -101,7 +102,8 @@ void STLHashTableIndex::find(std::string searchTerm) {
     else std::cout << "search term not found\n";
 }
 
-std::map<unsigned int, unsigned int> STLHashTableIndex::findAll(std::string keyword) {
+// id -> freq
+std::map<unsigned int, unsigned int> STLHashTableIndex::findAll(std::string keyword) { // TODO: refactor without exceptions
     try {
         entry& e = table.at(keyword);
         std::map<unsigned int, unsigned int> theMap;

@@ -6,7 +6,7 @@
 #include "lib/getopt_pp.h"
 #include "src/xmlparser.h"
 #include "src/index.h"
-#include "src/queryprocessor.h"
+#include "src/queryprocessor2.h"
 #include "src/stlhashtableindex.h"
 #include "src/stresstest.h"
 
@@ -72,38 +72,27 @@ int main(int argc, char* argv[])
             // declare new AVLTreeIndex
         } else if(ops >> GetOpt::Option('t', "hashtable", filepath)) {
             indexType = HASHTABLE;
-            index = new STLHashTableIndex(indexpath);
-            index->load();
-/*
-            std::thread threads[2];
-            Index* index = new STLHashTableIndex(indexpath);
-            XMLParser parser(filepath, index);
-
-            threads[0] = std::thread([&]() {
-                parser.parse();
-            });
-            threads[1] = std::thread([&]() {
-                parser.beginProcessing();
-            });
-            threads[0].join();
-            threads[1].join();*/
         }
 
-        bool exit = false;
-        queryprocessor* qproc = new queryprocessor(indexType);
+        if(indexType == HASHTABLE) index = new STLHashTableIndex(indexpath);
+        // else if(indexType == AVLTREE) index =
+        std::cout << "Loading " << indexpath << std::endl;
+        index->load();
+        std::cout << "Index loaded." << std::endl;
+
+        queryprocessor2 query_me(index);
 
         // enter a loop to allow the user to search index and process queries
-        while (!exit) {
-            char q[100];
-            std::vector<std::string> processed;
+        while (true) {
+            char q[100000];
 
             std::cout << "Please enter a search query: ";
-            std::cin.getline(q, 100);
+            std::cin.getline(q, 100000);
             std::string query(q);
-            if (query == "exit") exit = true;
-            processed = qproc->processQuery(query);
-            for(std::vector<std::string>::iterator it = processed.begin(); it != processed.end(); ++it) {
-                index->find(*it);
+            if (query == "exit") break;
+            auto results = query_me.processQuery(query);
+            for(auto it = results.begin(); it != results.end(); it++) {
+                std::cout << *it << ": " << index->IDtoTitle(*it) << std::endl;
             }
         }
     } else if(mode == STRESS) {

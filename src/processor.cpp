@@ -33,18 +33,8 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
             std::string word;
             std::unordered_map<std::string, unsigned int> frequencies;
             while(stream >> word) {
-                // remove stop words (40 seconds)
-                if(Processor::isStopWord(word)) continue;
-
-                // remove punctuation
-                word.erase(std::remove_if(word.begin(), word.end(), ispunct), word.end());
-                if(word.length() == 0) continue;
-
-                // stem words
-                char* word_c = (char*)word.c_str();
-                unsigned int x = stem(z, word_c, word.length() - 1);
-                word[x+1] = '\0';
-                word = word_c;
+                Processor::prepareWord(word, z);
+                if(word == "") continue;
 
                 // calculate frequencies
                 if(frequencies.count(word) > 0) frequencies[word] = frequencies[word] + 1;
@@ -61,7 +51,7 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
 
 void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, const bool* completedParsing, Index* index) {
     std::cout << "processing begins" << std::endl;
-    unsigned int numOfThreads = 10;
+    unsigned int numOfThreads = 16;
     std::thread threads[numOfThreads];
 
     for(unsigned int i = 0; i < numOfThreads; i++) {
@@ -82,6 +72,29 @@ void Processor::stemWord(std::string& word) {
     struct stemmer* z = create_stemmer();
     char* word_c = (char*)word.c_str();
     unsigned int x = stem(z, word_c, word.length() - 1);
+    word[x+1] = '\0';
+    word = word_c;
+}
+
+void Processor::prepareWord(std::string& word) {
+    struct stemmer* theStemmer = create_stemmer();
+    Processor::prepareWord(word, theStemmer);
+}
+
+void Processor::prepareWord(std::string& word, struct stemmer* theStemmer) {
+    // remove stop words
+    if(Processor::isStopWord(word)) {
+        word = "";
+        return;
+    }
+
+    // remove punctuation
+    word.erase(std::remove_if(word.begin(), word.end(), ispunct), word.end());
+    if(word.length() == 0) return;
+
+    // stem words
+    char* word_c = (char*)word.c_str();
+    unsigned int x = stem(theStemmer, word_c, word.length() - 1);
     word[x+1] = '\0';
     word = word_c;
 }
