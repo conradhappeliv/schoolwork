@@ -83,7 +83,7 @@ void STLHashTableIndex::load() {
 }
 
 void STLHashTableIndex::clear() {
-
+    table.clear();
 }
 
 void STLHashTableIndex::find(std::string searchTerm) {
