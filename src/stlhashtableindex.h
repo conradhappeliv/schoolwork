@@ -19,10 +19,12 @@ public:
     virtual void clear();
     virtual void find(std::string);
     virtual std::map<unsigned int, double> findAll(std::string);
+    bool loaded();
 private:
     std::mutex tableLock;
     std::unordered_map<std::string, entry> table;
     void addEntry(const entry);
+    bool finishedLoading = true;
 };
 
 #endif // STLHashTableIndex_H

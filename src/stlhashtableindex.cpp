@@ -55,10 +55,12 @@ void STLHashTableIndex::save() {
 }
 
 void STLHashTableIndex::load() {
+    finishedLoading = false;
     std::ifstream fin;
     fin.open(filename);
     if (!fin.is_open()) {
         std::cout << "Error opening " << filename << std::endl;
+        finishedLoading = true;
         return;
     }
 
@@ -99,6 +101,7 @@ void STLHashTableIndex::load() {
     }
     fin.close();
     parse.join();
+    finishedLoading = true;
 }
 
 void STLHashTableIndex::clear() {
@@ -128,6 +131,10 @@ std::map<unsigned int, double> STLHashTableIndex::findAll(std::string keyword) {
     double idf = calcIDF(table.size(), e.documents.size());
     for(auto it = e.documents.begin(); it != e.documents.end(); it++) theMap[it->id] = calcTFIDF(it->termFreq, idf);
     return theMap;
+}
+
+bool STLHashTableIndex::loaded() {
+    return finishedLoading;
 }
 
 void STLHashTableIndex::addEntry(const entry e) {

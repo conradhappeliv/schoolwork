@@ -26,15 +26,19 @@ std::string indexpath = "./default.index";
 
 int main(int argc, char* argv[])
 {
+    std::cout << " __  _       _   _      _       __ ___       _\n"
+              << "(_  |_  /\\  |_) /  |_| |_ |\\ | /__  |  |\\ | |_ \n"
+              << "__) |_ /--\\ | \\ \\_ | | |_ | \\| \\_| _|_ | \\| |_ \n\n";
+
     int mode = HELP; // default mode
 
     // mode option parsing
     GetOpt::GetOpt_pp ops(argc, argv);
 
     if(ops >> GetOpt::OptionPresent('h', "help")) mode = HELP;
+    else if(ops >> GetOpt::OptionPresent('m', "maintenance")) mode = MAINTENANCE;
     else if(ops >> GetOpt::OptionPresent('i', "interactive")) mode = INTERACTIVE;
     else if(ops >> GetOpt::OptionPresent('s', "stresstest")) mode = STRESS;
-    else if(ops >> GetOpt::OptionPresent('m', "maintenance")) mode = MAINTENANCE;
     else mode = HELP;
 
     // optparsing and execution specific to modes
@@ -76,11 +80,10 @@ int main(int argc, char* argv[])
 
         if(indexType == HASHTABLE) index = new STLHashTableIndex(indexpath);
         else if(indexType == AVLTREE) index = new AVLTreeIndex(indexpath);
-        std::cout << "Loading " << indexpath << std::endl;
-        std::flush(std::cout);
-        index->load();
-        std::cout << "\r";
-        std::flush(std::cout);
+        std::thread load_thread([&]() {
+            index->load();
+        });
+        if(indexType != HASHTABLE) load_thread.join();
 
         queryprocessor2 query_me(index);
 
@@ -91,48 +94,59 @@ int main(int argc, char* argv[])
             std::cout << "Please enter a search query, \"retrieve[all] [page_id]\", or \"exit\": ";
             std::cin.getline(q, 100000);
             std::string query(q);
-            if (query == "exit") break;
-            else if(query.compare(0, 8, "retrieve") == 0) {
-                bool all = false;
-                unsigned int offset = 9;
-                if(query.compare(8, 3, "all") == 0) {
-                    all = true;
-                    offset += 3;
-                }
-                std::string display_me = "";
+            if (query == "exit") {
+                load_thread.detach();
+                break;
+            }
+            else {
+                std::string loadstring = "Waiting for index to finish loading...";
+                std::cout << loadstring;
+                std::flush(std::cout);
+                while(!index->loaded());
+                std::cout << '\r' << std::string(loadstring.length(), ' ') << '\r'; // erase loading line
+                std::flush(std::cout);
+                if(query.compare(0, 8, "retrieve") == 0) {
+                    bool all = false;
+                    unsigned int offset = 9;
+                    if(query.compare(8, 3, "all") == 0) {
+                        all = true;
+                        offset += 3;
+                    }
+                    std::string display_me = "";
 
-                unsigned int page_id = std::atoi(query.substr(offset, std::string::npos).c_str());
-                try {
-                    const Page* page = index->IDtoPage(page_id);
-                    display_me += "\n----------\n";
-                    display_me += page->title + '\n';
-                    display_me += "Posted on " + page->date + " by " + page->username + '\n';
-                    display_me += "----------\n";
-                    display_me += page->body;
-                } catch (std::invalid_argument) {
-                    std::cout << "Page not in index" << std::endl;
-                    continue;
+                    unsigned int page_id = std::atoi(query.substr(offset, std::string::npos).c_str());
+                    try {
+                        const Page* page = index->IDtoPage(page_id);
+                        display_me += "\n----------\n";
+                        display_me += page->title + '\n';
+                        display_me += "Posted on " + page->date + " by " + page->username + '\n';
+                        display_me += "----------\n";
+                        display_me += page->body;
+                    } catch (std::invalid_argument) {
+                        std::cout << "Page not in index" << std::endl;
+                        continue;
+                    }
+                    if(!all && display_me.length() > 4096) {
+                        display_me.erase(4096);
+                        std::cout << display_me << std::endl;
+                        std::cout << std::endl << "------------------------------------" << std::endl;
+                        std::cout << "Type \"retrieveall " << page_id << "\" to see the entire contents." << std::endl;
+                    } else if(all) {
+                        char* temp_filename = "./temp";
+                        std::ofstream temp_file(temp_filename);
+                        temp_file << display_me;
+                        temp_file.close();
+                        system("less ./temp");
+                        remove(temp_filename);
+                    } else std::cout << display_me << std::endl;
+                } else {
+                    auto results = query_me.processQuery(query);
+                    if(results.size() == 0) std::cout << "No results." << std::endl;
+                    for(auto it = results.begin(); it != results.end(); it++) {
+                        std::cout << *it << ": " << index->IDtoTitle(*it) << std::endl;
+                    }
+                    std::cout << std::endl << std::endl;
                 }
-                if(!all && display_me.length() > 4096) {
-                    display_me.erase(4096);
-                    std::cout << display_me << std::endl;
-                    std::cout << std::endl << "------------------------------------" << std::endl;
-                    std::cout << "Type \"retrieveall " << page_id << "\" to see the entire contents." << std::endl;
-                } else if(all) {
-                    char* temp_filename = "./temp";
-                    std::ofstream temp_file(temp_filename);
-                    temp_file << display_me;
-                    temp_file.close();
-                    system("less ./temp");
-                    remove(temp_filename);
-                } else std::cout << display_me << std::endl;
-            } else {
-                auto results = query_me.processQuery(query);
-                if(results.size() == 0) std::cout << "No results." << std::endl;
-                for(auto it = results.begin(); it != results.end(); it++) {
-                    std::cout << *it << ": " << index->IDtoTitle(*it) << std::endl;
-                }
-                std::cout << std::endl << std::endl;
             }
         }
     } else if(mode == STRESS) {
