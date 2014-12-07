@@ -30,7 +30,7 @@ public:
     virtual void load();
     virtual void clear();
     virtual void find(std::string);
-    virtual std::map<unsigned int, unsigned int> findAll(std::string);
+    virtual std::map<unsigned int, double> findAll(std::string);
 
 private:
     AVLTreeNode* search(std::string compkey);

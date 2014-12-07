@@ -1,8 +1,11 @@
 // Owner: Edward Li
 
 #include "avltreeindex.h"
+
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
+#include <linux/limits.h>
 
 // constructor
 AVLTreeIndex::AVLTreeIndex(std::string filename):Index(filename)
@@ -204,7 +207,6 @@ void AVLTreeIndex::print(std::ofstream& fout, printPath dir, const AVLTreeNode* 
     if (dir == KEY) {
         // format: keyword;idf;id,freq;id,freq;id,freq;
         fout << node->nodeentry.keyword << ";";
-        fout << node->nodeentry.idf << ";";
         for (auto i = node->nodeentry.documents.begin(); i != node->nodeentry.documents.end(); i++) {
             fout << i->id << ";";
             fout << i->termFreq << ":";
@@ -233,7 +235,15 @@ void AVLTreeIndex::save() {
         exit(1);
     } else {std::cout << filename << " successfully opened." << std::endl;}
 
+    if(indexReferenced[0] != '/') {
+        indexReferenced.insert(0, "/");
+        char c[PATH_MAX];
+        getcwd(c, PATH_MAX);
+        indexReferenced.insert(0, c);
+    }
+
     // write out all data to file
+    fout << indexReferenced << std::endl;
     dumpTree(fout, root);
     std::cout << "index written to file." << std::endl;
     fout.close();
@@ -244,17 +254,16 @@ void AVLTreeIndex::load() {
     fin.open(filename, std::ios::in);
     if (!fin.is_open()) {
         std::cout << "Error opening " << filename << std::endl;
-        exit(1);
+        return;
     } else {std::cout << filename << " successfully opened." << std::endl;}
 
     // read in index from file
+    std::getline(fin, indexReferenced);
     while (!fin.eof()) {
         entry e;
         std::string keyword_in, idf_in, id_in, tf_in;
         std::getline(fin, keyword_in, ';');
-        std::getline(fin, idf_in, ';');
         e.keyword = keyword_in;
-        e.idf = std::atoi(idf_in.c_str());
         //std::cout << keyword_in << ";" << idf_in << ";";
 
         bool val = true;
@@ -265,15 +274,12 @@ void AVLTreeIndex::load() {
             d.id = std::atoi(id_in.c_str());
             d.termFreq = std::atoi(tf_in.c_str());
             e.documents.push_back(d);
-            //std::cout << id_in << "," << tf_in << ";";
             if (fin.peek() == '\n' || !fin.good()) {
                 fin.get();
-                //std::cout << "end of line";
                 val = false;
             }
         }
         addEntry(e);
-        //std::cout << std::endl;
     }
     fin.close();
 }
@@ -301,6 +307,6 @@ void AVLTreeIndex::addEntry(const entry e) {
     insert(n);
 }
 
-std::map<unsigned int, unsigned int> AVLTreeIndex::findAll(std::string) {
+std::map<unsigned int, double> AVLTreeIndex::findAll(std::string) {
 
 }

@@ -58,7 +58,6 @@ void STLHashTableIndex::load() {
     fin.open(filename);
     if (!fin.is_open()) {
         std::cout << "Error opening " << filename << std::endl;
-        //exit(1);
         return;
     }
 
