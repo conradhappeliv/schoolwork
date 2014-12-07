@@ -4,6 +4,8 @@
 #include <sstream>
 #include <unordered_map>
 #include <set>
+#include <iostream>
+
 
 std::vector<unsigned int> queryprocessor2::processQuery(std::string queryLine) {
     std::set<std::string> ANDs;
@@ -16,6 +18,7 @@ std::vector<unsigned int> queryprocessor2::processQuery(std::string queryLine) {
     stream >> curWord;
     if(!isQueryOp(curWord)) { // no initial boolean query
         curOp = "AND";
+        Processor::prepareWord(curWord);
         ANDs.insert(curWord);
     } else curOp = curWord;
 
@@ -24,6 +27,7 @@ std::vector<unsigned int> queryprocessor2::processQuery(std::string queryLine) {
         if(isQueryOp(curWord)) curOp = curWord;
         else {
             Processor::prepareWord(curWord);
+            std::cout << curWord << std::endl;
             if(curWord == "") continue;
             if(curOp == "AND") ANDs.insert(curWord);
             else if(curOp == "OR") ORs.insert(curWord);
