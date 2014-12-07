@@ -8,6 +8,7 @@
 #include "src/index.h"
 #include "src/queryprocessor2.h"
 #include "src/stlhashtableindex.h"
+#include "src/avltreeindex.h"
 #include "src/stresstest.h"
 
 enum modes {
@@ -51,7 +52,7 @@ int main(int argc, char* argv[])
         } else if(ops >> GetOpt::OptionPresent('c', "clear")){ // clear index
             Index* index = new STLHashTableIndex(indexpath);
             index->clear();
-        } else if(ops >> GetOpt::OptionPresent('o', "open")) { // open index file TEST FUNCTIONALITY
+        } else if(ops >> GetOpt::OptionPresent('o', "open")) { // open index FILE TEST FUNCTIONALITY
             Index* index = new STLHashTableIndex(indexpath);
             index->load();
         } else { // show help relevant to maintenance mode
@@ -66,7 +67,6 @@ int main(int argc, char* argv[])
 
         if(ops >> GetOpt::Option('a', "avltree", filepath)) {
             indexType = AVLTREE;
-            // declare new AVLTreeIndex
         } else if(ops >> GetOpt::Option('t', "hashtable", filepath)) {
             indexType = HASHTABLE;
         }
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
         ops >> GetOpt::Option('p', "indexpath", indexpath);
 
         if(indexType == HASHTABLE) index = new STLHashTableIndex(indexpath);
-        // else if(indexType == AVLTREE) index = TODO:
+        else if(indexType == AVLTREE) index = new AVLTreeIndex(indexpath);
         std::cout << "Loading " << indexpath << std::endl;
         index->load();
         std::cout << "Index loaded." << std::endl;

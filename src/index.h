@@ -31,6 +31,7 @@ public:
     Index(std::string filen):filename(filen) {
         pages.reserve(256279);
     }
+    virtual ~Index() {}
     void setIndexFile(std::string filen) { indexReferenced = filen; }
     virtual void add(const unsigned int, const std::string, const double) = 0;
     void addDoc(const unsigned int, Page*);
