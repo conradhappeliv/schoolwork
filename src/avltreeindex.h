@@ -18,17 +18,6 @@ struct AVLTreeNode : public Index {
     AVLTreeNode* right;
     AVLTreeNode* parent;
     int balance;
-/*
-    AVLTreeNode():key(NULL),
-        nodeentry(),
-        left(NULL),
-        right(NULL),
-        parent(NULL),
-        balance(0){}
-
-    ~AVLTreeNode() {
-        delete n;
-    }*/
 };
 
 class AVLTreeIndex : public Index
