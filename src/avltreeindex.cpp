@@ -2,9 +2,10 @@
 
 #include "avltreeindex.h"
 #include <iostream>
+#include <fstream>
 
 // constructor
-AVLTreeIndex::AVLTreeIndex()
+AVLTreeIndex::AVLTreeIndex(std::string filename):Index(filename)
 {
     root = NULL;
 }
@@ -12,21 +13,33 @@ AVLTreeIndex::AVLTreeIndex()
 // destructor
 AVLTreeIndex::~AVLTreeIndex()
 {
-    clear(root);
+    purge(root);
 }
 
-// used by destructor to recursively delete nall nodes in tree
-void AVLTreeIndex::clear(AVLTreeNode *n)
+// used by destructor to recursively delete all nodes in tree
+void AVLTreeIndex::purge(AVLTreeNode *n)
 {
     if (n != NULL) {
-        clear(n->left);
-        clear(n->right);
+        purge(n->left);
+        purge(n->right);
         delete n;
     }
 }
 
+// search for node in tree, returns null if term not found
+AVLTreeNode* AVLTreeIndex::search(std::string compkey) {
+    AVLTreeNode* temp;
+    temp = root;
+    while (temp) {
+        if (temp->key.compare(compkey) < 0) temp = temp->right;
+        else if (temp->key.compare(compkey) > 0) temp = temp->left;
+        else if (temp->key.compare(compkey) == 0) break;
+    }
+    return temp;
+}
+
 // insert new node into tree
-void AVLTreeIndex::insert(AVLTreeNode *newNode)
+void AVLTreeIndex::insert(AVLTreeNode* newNode)
 {
     AVLTreeNode *temp, *prev, *parent;
 
@@ -44,12 +57,16 @@ void AVLTreeIndex::insert(AVLTreeNode *newNode)
     while (temp != NULL) {
         prev = temp;
         if (temp->balance != balanced) parent = temp;
-        if (newNode->key < temp->key) temp = temp->left;
-        else temp = temp->right;
+        if (temp->key.compare(newNode->key) < 0) temp = temp->right;
+        else if (temp->key.compare(newNode->key) > 0) temp = temp->left;
+        else if (temp->key.compare(newNode->key) == 0) {
+            std::cout << "node already exists" << std::endl;
+            break;
+        }
     }
 
     newNode->parent = prev; // set parent
-    if (newNode->key < prev->key) prev->left = newNode; // insert left
+    if (newNode->key.compare(prev->key) < 0) prev->left = newNode; // insert left
     else prev->right = newNode; // insert right
 
     restoreBalance(parent, newNode); // restores balance of AVL tree
@@ -57,16 +74,16 @@ void AVLTreeIndex::insert(AVLTreeNode *newNode)
 
 void AVLTreeIndex::restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode)
 {
-    // case 1: parent is balanced, newNode unbalances
+    // case 1: parent DNE, root node case, newNode unbalances
     if (parent == NULL) {
         if (newNode->key < root->key) root->balance = biasleft; // newNode inserted left of root
         else root->balance = biasright; // newNode inserted right of root
         adjustBalance(root, newNode);
     }
 
-    // case 2: insertion of newNode in opposite subtree of parent's current balance
-    else if (((parent->balance == biasleft) && (newNode->key > parent->key)) ||
-             ((parent->balance == biasright) && (newNode->key < parent->key))) {
+    // case 2: insertion of newNode in opposite subtree of parent, balances parent
+    else if (((parent->balance == biasleft) && (newNode->key.compare(parent->key) > 0)) ||
+             ((parent->balance == biasright) && (newNode->key.compare(parent->key) < 0))) {
         parent->balance = balanced;
         adjustBalance(parent, newNode);
     }
@@ -170,37 +187,120 @@ void AVLTreeIndex::adjustRL(AVLTreeNode *last, AVLTreeNode *first)
 }
 
 // print tree
-void AVLTreeIndex::printTree()
-{
-    std::cout << "\n*****Printing AVL tree*****\n";
-    std::cout << "Root node: " << root->key << "\n";
-    std::cout << "Balance factor: " << root->balance << "\n\n";
-    print(root);
-}
-
-void AVLTreeIndex::print(AVLTreeNode *n)
-{
-    if (n != NULL) {
-        std::cout << "Node" << n->key << "\n";
-        std::cout << "Balance factor: " << n->balance << "\n\n";
-
-        // print left subtree
-        if (n->left != NULL) {
-            std::cout << "***left child***\n";
-            print(n->left);
-            std::cout << "returning to node " << n->key << " from left subtree\n";
-        } else std::cout << "***left subtree is empty\n";
-
-        // print right subtree
-        if (n->right != NULL) {
-            std::cout << "***right child***\n";
-            print(n->right);
-            std::cout << "returning to node " << n->key << " from right subtree\n";
-        } else std::cout << "***right subtree is empty\n";
+void AVLTreeIndex::dumpTree(std::ofstream& fout, const AVLTreeNode* node) {
+    if (node == NULL) {
+        std::cout << "empty" << std::endl;
+    } else { // if non-empty tree
+        print(fout, RIGHT, node);
+        if (node->right != NULL) dumpTree(fout, node->right);
+        print(fout, KEY, node);
+        if (node->left != NULL) dumpTree(fout, node->left);
+        print(fout, LEFT, node);
     }
 }
 
-AVLTreeNode* AVLTreeIndex::find(std::string keyword)
-{
-    // TODO: to be implemented
+// print data for current node
+void AVLTreeIndex::print(std::ofstream& fout, printPath dir, const AVLTreeNode* node) {
+    if (dir == KEY) {
+        // format: keyword;idf;id,freq;id,freq;id,freq;
+        fout << node->nodeentry.keyword << ";";
+        fout << node->nodeentry.idf << ";";
+        for (auto i = node->nodeentry.documents.begin(); i != node->nodeentry.documents.end(); i++) {
+            fout << i->id << ";";
+            fout << i->termFreq << ":";
+        }
+        fout << "\n";
+    }
+}
+
+
+// *********INTERFACE FUNCTIONALITY********
+void AVLTreeIndex::add(const unsigned int id, const std::string word, const unsigned int freq) {
+    entry::doc d;
+    d.id = id;
+    d.termFreq = freq;
+    AVLTreeNode* n = search(word);
+    entry& e = n->nodeentry;
+    if (e.keyword != word) e.keyword = word;
+    e.documents.push_back(d);
+}
+
+void AVLTreeIndex::save() {
+    std::ofstream fout;
+    fout.open(filename, std::ios::out | std::ios::app);
+    if (!fout.is_open()) {
+        std::cout << "Error opening " << filename << std::endl;
+        exit(1);
+    } else {std::cout << filename << " successfully opened." << std::endl;}
+
+    // write out all data to file
+    dumpTree(fout, root);
+    std::cout << "index written to file." << std::endl;
+    fout.close();
+}
+
+void AVLTreeIndex::load() {
+    std::ifstream fin;
+    fin.open(filename, std::ios::in);
+    if (!fin.is_open()) {
+        std::cout << "Error opening " << filename << std::endl;
+        exit(1);
+    } else {std::cout << filename << " successfully opened." << std::endl;}
+
+    // read in index from file
+    while (!fin.eof()) {
+        entry e;
+        std::string keyword_in, idf_in, id_in, tf_in;
+        std::getline(fin, keyword_in, ';');
+        std::getline(fin, idf_in, ';');
+        e.keyword = keyword_in;
+        e.idf = std::atoi(idf_in.c_str());
+        //std::cout << keyword_in << ";" << idf_in << ";";
+
+        bool val = true;
+        while(val) {
+            std::getline(fin, id_in, ',');
+            std::getline(fin, tf_in, ';');
+            entry::doc d;
+            d.id = std::atoi(id_in.c_str());
+            d.termFreq = std::atoi(tf_in.c_str());
+            e.documents.push_back(d);
+            //std::cout << id_in << "," << tf_in << ";";
+            if (fin.peek() == '\n' || !fin.good()) {
+                fin.get();
+                //std::cout << "end of line";
+                val = false;
+            }
+        }
+        addEntry(e);
+        //std::cout << std::endl;
+    }
+    fin.close();
+}
+
+void AVLTreeIndex::clear() {
+    std::ofstream fout;
+    fout.open(filename, std::ios::out | std::ios::trunc);
+    if (!fout.is_open()) {
+        std::cout << "Error opening " << filename << std::endl;
+        exit(1);
+    } else {std::cout << filename << " successfully opened." << std::endl;}
+    fout.close(); // opened in truncate-option, auto-deletes previous content
+    std::cout << filename << " contents cleared." << std::endl;
+}
+
+void AVLTreeIndex::find(std::string keyword) {
+    AVLTreeNode* node;
+    node = search(keyword);
+}
+
+void AVLTreeIndex::addEntry(const entry e) {
+    AVLTreeNode* n;
+    n->key = e.keyword;
+    n->nodeentry = e;
+    insert(n);
+}
+
+std::map<unsigned int, unsigned int> AVLTreeIndex::findAll(std::string) {
+
 }
