@@ -32,6 +32,7 @@ public:
         pages.reserve(256279);
     }
     void addReference(std::string filen) { references.push_back(filen); }
+    virtual ~Index() {}
     virtual void add(const unsigned int, const std::string, const double) = 0;
     void addDoc(const unsigned int, Page*);
     virtual void save() = 0;

@@ -104,8 +104,8 @@ void STLHashTableIndex::load() {
 void STLHashTableIndex::clear() {
     table.clear();
 }
-
 void STLHashTableIndex::find(std::string searchTerm) {
+    /*
     auto srch = table.find(searchTerm);
     if (srch != table.end()) {
         std::cout << "SEARCH TERM: " << srch->first << std::endl;
@@ -118,7 +118,7 @@ void STLHashTableIndex::find(std::string searchTerm) {
         }
 
     }
-    else std::cout << "search term not found\n";
+    else std::cout << "search term not found\n";*/
 }
 
 // id -> tfidf

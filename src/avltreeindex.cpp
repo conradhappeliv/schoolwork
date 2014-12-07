@@ -11,6 +11,7 @@
 AVLTreeIndex::AVLTreeIndex(std::string filename):Index(filename)
 {
     root = NULL;
+    treeSize = 0;
 }
 
 // destructor
@@ -72,6 +73,7 @@ void AVLTreeIndex::insert(AVLTreeNode* newNode)
     if (newNode->key.compare(prev->key) < 0) prev->left = newNode; // insert left
     else prev->right = newNode; // insert right
 
+    treeSize++;
     restoreBalance(parent, newNode); // restores balance of AVL tree
 }
 
@@ -217,7 +219,7 @@ void AVLTreeIndex::print(std::ofstream& fout, printPath dir, const AVLTreeNode* 
 
 
 // *********INTERFACE FUNCTIONALITY********
-void AVLTreeIndex::add(const unsigned int id, const std::string word, const unsigned int freq) {
+void AVLTreeIndex::add(const unsigned int id, const std::string word, const double freq) {
     entry::doc d;
     d.id = id;
     d.termFreq = freq;
@@ -303,9 +305,9 @@ void AVLTreeIndex::clear() {
     std::cout << filename << " contents cleared." << std::endl;
 }
 
-void AVLTreeIndex::find(std::string keyword) {
-    AVLTreeNode* node;
-    node = search(keyword);
+void AVLTreeIndex::find(std::string searchTerm) {
+    //AVLTreeNode* node;
+    //node = search(keyword);
 }
 
 void AVLTreeIndex::addEntry(const entry e) {
@@ -315,6 +317,12 @@ void AVLTreeIndex::addEntry(const entry e) {
     insert(n);
 }
 
-std::map<unsigned int, double> AVLTreeIndex::findAll(std::string) {
-
+// id -> tfidf
+std::map<unsigned int, double> AVLTreeIndex::findAll(std::string keyword) {
+    AVLTreeNode* n = search(keyword);
+    entry& e = n->nodeentry;
+    std::map<unsigned int, double> theMap;
+    double idf = calcIDF(treeSize, e.documents.size());
+    for(auto it = e.documents.begin(); it != e.documents.end(); it++) theMap[it->id] = calcTFIDF(it->termFreq, idf);
+    return theMap;
 }

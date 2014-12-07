@@ -5,6 +5,7 @@
 
 #include <string>
 #include "index.h"
+//#include "AVLTreeNode.h"
 
 const int biasleft = -1;
 const int balanced = 0;
@@ -13,11 +14,14 @@ enum printPath {LEFT, KEY, RIGHT};
 
 struct AVLTreeNode : public Index {
     std::string key;
-    entry nodeentry;
+    Index::entry nodeentry;
     AVLTreeNode* left;
     AVLTreeNode* right;
     AVLTreeNode* parent;
     int balance;
+
+    AVLTreeNode():Index(filename),key(NULL),left(NULL),right(NULL),parent(NULL),balance(0) {}
+    virtual ~AVLTreeNode() {}
 };
 
 class AVLTreeIndex : public Index
@@ -25,7 +29,7 @@ class AVLTreeIndex : public Index
 public:
     AVLTreeIndex(std::string);
     ~AVLTreeIndex();
-    virtual void add(const unsigned int, const std::string, const unsigned int);
+    virtual void add(const unsigned int, const std::string, const double);
     virtual void save();
     virtual void load();
     virtual void clear();
@@ -46,6 +50,7 @@ private:
     void print(std::ofstream& fout, printPath dir, const AVLTreeNode* node);
 
     AVLTreeNode *root;
+    int treeSize;
     void purge(AVLTreeNode *n);
     void addEntry (const entry e);
 };
