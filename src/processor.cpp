@@ -38,8 +38,6 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
 
                 // calculate frequencies
                 frequencies[word]++;
-                /*if(frequencies.count(word) > 0) frequencies[word] = frequencies[word] + 1;
-                else frequencies[word] = 1;*/
             }
 
             // find max_frequency for augmented frequency
@@ -58,7 +56,6 @@ void threadProcess(std::stack<Page*>* toBeProcessed, std::mutex* TBPLock, const 
 }
 
 void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, const bool* completedParsing, Index* index) {
-    std::cout << "processing begins" << std::endl;
     unsigned int numOfThreads = 16;
     std::thread threads[numOfThreads];
 
@@ -68,7 +65,6 @@ void Processor::process(std::stack<Page*>& toBeProcessed, std::mutex& TBPLock, c
     for(unsigned int i = 0; i < numOfThreads; i++) {
         threads[i].join();
     }
-    std::cout << "processing complete\n";
 }
 
 bool Processor::isStopWord(std::string word) {

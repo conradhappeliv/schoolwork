@@ -17,7 +17,6 @@ XMLParser::XMLParser(std::string filen, Index* inde) {
 }
 
 void XMLParser::parse() {
-    std::cout << "xml parsing begins" << std::endl;
     xmlpp::TextReader reader(filename);
     while(reader.read()) {
         if(reader.get_name() == "page") { // start of page
@@ -27,8 +26,6 @@ void XMLParser::parse() {
             std::string timestamp;
             std::string username;
 
-            // TODO: CLEAN THIS SECTION UP WHEN SURE IT'S WORKING
-            // is the data always in order??? we must be careful.
             bool stillReading = true;
             do stillReading = reader.read();
             while(reader.get_name() != "title" && stillReading);
@@ -58,7 +55,6 @@ void XMLParser::parse() {
         }
     }
     finished = true;
-    std::cout << "xml parsing complete\n";
 }
 
 bool XMLParser::complete() {

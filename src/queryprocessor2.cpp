@@ -27,7 +27,6 @@ std::vector<unsigned int> queryprocessor2::processQuery(std::string queryLine) {
         if(isQueryOp(curWord)) curOp = curWord;
         else {
             Processor::prepareWord(curWord);
-            std::cout << curWord << std::endl;
             if(curWord == "") continue;
             if(curOp == "AND") ANDs.insert(curWord);
             else if(curOp == "OR") ORs.insert(curWord);
@@ -37,48 +36,39 @@ std::vector<unsigned int> queryprocessor2::processQuery(std::string queryLine) {
 
     // gather all the stuff & set operations along the way
     // this map is term -> multimap(page_id -> tf-idf)
-    std::unordered_map<std::string, std::multimap<unsigned int, double>> words;
+    std::map<unsigned int, double> words;
         // ANDs
         for(auto it = ANDs.begin(); it != ANDs.end(); it++) {
+            auto res = theIndex->findAll(*it);
             if(it == ANDs.begin()) {
-                auto res = theIndex->findAll(*it);
-                for(auto it2 = res.begin(); it2 != res.end(); it2++) {
-                    words[*it].emplace(it2->first, it2->second);
-                }
+                words.swap(res);
             } else {
-                auto res = theIndex->findAll(*it);
-                for(auto it2 = res.begin(); it2 != res.end(); it2++) {
-                    if(words[*it].find(it2->first) == words[*it].end()) words.erase(*it); // word doesn't exist before
+                for(auto it2 = words.begin(); it2 != words.end(); it2++) {
+                    auto res_word = res.find(it2->first);
+                    if(res_word == res.end()) words.erase(it2);
+                    else it2->second += res_word->second; // increase ranking
                 }
-                if(words.empty()) break; // not all words->pages intersect
             }
+            if(words.empty()) break;
         }
+
         // ORs
+        // TODO: should words with multiple OR terms have a higher ranking?? That's how it is currently
         for(auto it = ORs.begin(); it != ORs.end(); it++) {
             auto res = theIndex->findAll(*it);
-            for(auto it2 = res.begin(); it2 != res.end(); it2++) {
-                words[*it].emplace(it2->first, it2->second);
-            }
+            for(auto it2 = res.begin(); it2 != res.end(); it2++) words[it2->first] += it2->second;
         }
+
         // NOTs
         for(auto it = NOTs.begin(); it != NOTs.end(); it++) {
             auto res = theIndex->findAll(*it);
-            for(auto it2 = res.begin(); it2 != res.end(); it2++) {
-                for(auto it3 = words.begin(); it3 != words.end(); it3++) {
-                    if(it3->second.find(it2->first) != it3->second.end()) {
-                        words.erase(it3);
-                        break;
-                    }
-                }
-            }
+            for(auto it2 = res.begin(); it2 != res.end(); it2++) words.erase(it2->first);
         }
 
     // order results by tf-idf
     std::multimap<double, unsigned int> sorted; // this map should automatically sort by key (if-idf)
     for(auto it = words.begin(); it != words.end(); it++) {
-        for(auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            sorted.insert(std::pair<double, unsigned int>(it2->second, it2->first));
-        }
+        sorted.insert(std::pair<double, unsigned int>(it->second, it->first));
     }
 
     // then transfer results to return vector of page ids

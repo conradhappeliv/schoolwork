@@ -97,12 +97,16 @@ int main(int argc, char* argv[])
                     all = true;
                     offset += 3;
                 }
-                std::string display_me = query.substr(offset, std::string::npos);
-                unsigned int page_id = std::atoi(display_me.c_str());
-                display_me += ": ";
+                std::string display_me = "";
+
+                unsigned int page_id = std::atoi(query.substr(offset, std::string::npos).c_str());
                 try {
-                    display_me += index->IDtoTitle(page_id) + '\n';
-                    display_me += index->IDtoText(page_id);
+                    const Page* page = index->IDtoPage(page_id);
+                    display_me += "\n----------\n";
+                    display_me += page->title + '\n';
+                    display_me += "Posted on " + page->date + " by " + page->username + '\n';
+                    display_me += "----------\n";
+                    display_me += page->body;
                 } catch (std::invalid_argument) {
                     std::cout << "Page not in index" << std::endl;
                     continue;
