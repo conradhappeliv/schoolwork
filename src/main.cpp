@@ -54,8 +54,7 @@ int main(int argc, char* argv[])
             parser.threadedParseAndProcess();
             index->save();
         } else if(ops >> GetOpt::OptionPresent('c', "clear")){ // clear index
-            Index* index = new STLHashTableIndex(indexpath);
-            index->clear();
+            remove(indexpath.c_str());
         } else if(ops >> GetOpt::OptionPresent('o', "open")) { // open index FILE TEST FUNCTIONALITY
             Index* index = new STLHashTableIndex(indexpath);
             index->load();
