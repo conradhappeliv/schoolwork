@@ -28,7 +28,7 @@ void STLHashTableIndex::save() {
     fout.open(filename);
     if (!fout.is_open()) {
         std::cout << "Error opening " << filename << std::endl;
-        exit(1);
+        throw std::invalid_argument("file was unable to be opened");
     }
 
     // get cwd
@@ -49,7 +49,6 @@ void STLHashTableIndex::save() {
         }
         fout << "\n";
     }
-    fout << "?";
     fout.close();
 }
 
@@ -81,9 +80,8 @@ void STLHashTableIndex::load() {
             std::getline(fin, tf_in, ';');
             entry::doc d;
             d.id = std::atoi(id_in.c_str());
-            d.termFreq = std::atoi(tf_in.c_str());
+            d.termFreq = std::atof(tf_in.c_str());
             e.documents.push_back(d);
-            //std::cout << id_in << "," << tf_in << ";";
             if (fin.peek() == '\n' || !fin.good()) {
                 fin.get();
                 //std::cout << "end of line";
@@ -118,7 +116,7 @@ void STLHashTableIndex::find(std::string searchTerm) {
 }
 
 // id -> tfidf
-std::map<unsigned int, double> STLHashTableIndex::findAll(std::string keyword) { // TODO: refactor without exceptions
+std::map<unsigned int, double> STLHashTableIndex::findAll(std::string keyword) {
     entry& e = table[keyword];
     std::map<unsigned int, double> theMap;
     double idf = calcIDF(table.size(), e.documents.size());

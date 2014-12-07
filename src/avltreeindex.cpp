@@ -272,7 +272,7 @@ void AVLTreeIndex::load() {
             std::getline(fin, tf_in, ';');
             entry::doc d;
             d.id = std::atoi(id_in.c_str());
-            d.termFreq = std::atoi(tf_in.c_str());
+            d.termFreq = std::atof(tf_in.c_str());
             e.documents.push_back(d);
             if (fin.peek() == '\n' || !fin.good()) {
                 fin.get();
