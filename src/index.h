@@ -38,7 +38,6 @@ public:
     virtual void save() = 0;
     virtual void load() = 0;
     virtual void clear() = 0;
-    virtual void find(std::string) = 0;
     virtual std::map<unsigned int, double> findAll(std::string) = 0;
 
     const std::string IDtoTitle(const unsigned int);

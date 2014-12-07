@@ -31,7 +31,7 @@ void AVLTreeIndex::purge(AVLTreeNode *n)
 }
 
 // search for node in tree, returns null if term not found
-AVLTreeNode* AVLTreeIndex::search(std::string compkey) {
+Index::entry& AVLTreeIndex::search(std::string compkey) {
     AVLTreeNode* temp;
     temp = root;
     while (temp) {
@@ -39,7 +39,7 @@ AVLTreeNode* AVLTreeIndex::search(std::string compkey) {
         else if (temp->key.compare(compkey) > 0) temp = temp->left;
         else if (temp->key.compare(compkey) == 0) break;
     }
-    return temp;
+    return temp->nodeentry;
 }
 
 // insert new node into tree
@@ -223,8 +223,7 @@ void AVLTreeIndex::add(const unsigned int id, const std::string word, const doub
     entry::doc d;
     d.id = id;
     d.termFreq = freq;
-    AVLTreeNode* n = search(word);
-    entry& e = n->nodeentry;
+    Index::entry& e = search(word);
     if (e.keyword != word) e.keyword = word;
     e.documents.push_back(d);
 }
@@ -295,23 +294,11 @@ void AVLTreeIndex::load() {
 }
 
 void AVLTreeIndex::clear() {
-    std::ofstream fout;
-    fout.open(filename, std::ios::out | std::ios::trunc);
-    if (!fout.is_open()) {
-        std::cout << "Error opening " << filename << std::endl;
-        exit(1);
-    } else {std::cout << filename << " successfully opened." << std::endl;}
-    fout.close(); // opened in truncate-option, auto-deletes previous content
-    std::cout << filename << " contents cleared." << std::endl;
-}
-
-void AVLTreeIndex::find(std::string searchTerm) {
-    //AVLTreeNode* node;
-    //node = search(keyword);
+    purge(root);
 }
 
 void AVLTreeIndex::addEntry(const entry e) {
-    AVLTreeNode* n;
+    AVLTreeNode* n = new AVLTreeNode();
     n->key = e.keyword;
     n->nodeentry = e;
     insert(n);
@@ -319,8 +306,7 @@ void AVLTreeIndex::addEntry(const entry e) {
 
 // id -> tfidf
 std::map<unsigned int, double> AVLTreeIndex::findAll(std::string keyword) {
-    AVLTreeNode* n = search(keyword);
-    entry& e = n->nodeentry;
+    Index::entry& e = search(keyword);
     std::map<unsigned int, double> theMap;
     double idf = calcIDF(treeSize, e.documents.size());
     for(auto it = e.documents.begin(); it != e.documents.end(); it++) theMap[it->id] = calcTFIDF(it->termFreq, idf);

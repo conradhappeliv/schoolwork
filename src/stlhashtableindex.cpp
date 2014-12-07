@@ -104,22 +104,6 @@ void STLHashTableIndex::load() {
 void STLHashTableIndex::clear() {
     table.clear();
 }
-void STLHashTableIndex::find(std::string searchTerm) {
-    /*
-    auto srch = table.find(searchTerm);
-    if (srch != table.end()) {
-        std::cout << "SEARCH TERM: " << srch->first << std::endl;
-        std::cout << "*****RESULTS*****" << std::endl;
-        for (auto j = srch->second.documents.begin(); j != srch->second.documents.end(); j++) {
-            std::cout << "doc ID: " << j->id << std::endl;
-            const unsigned int temp_id = j->id;
-            std::string idfromtitle = IDtoTitle(temp_id);
-            std::cout << "title: " << idfromtitle << "\n\n";
-        }
-
-    }
-    else std::cout << "search term not found\n";*/
-}
 
 // id -> tfidf
 std::map<unsigned int, double> STLHashTableIndex::findAll(std::string keyword) {

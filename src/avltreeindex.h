@@ -12,18 +12,6 @@ const int balanced = 0;
 const int biasright = 1;
 enum printPath {LEFT, KEY, RIGHT};
 
-struct AVLTreeNode : public Index {
-    std::string key;
-    Index::entry nodeentry;
-    AVLTreeNode* left;
-    AVLTreeNode* right;
-    AVLTreeNode* parent;
-    int balance;
-
-    AVLTreeNode():Index(filename),key(NULL),left(NULL),right(NULL),parent(NULL),balance(0) {}
-    virtual ~AVLTreeNode() {}
-};
-
 class AVLTreeIndex : public Index
 {
 public:
@@ -33,11 +21,23 @@ public:
     virtual void save();
     virtual void load();
     virtual void clear();
-    virtual void find(std::string);
     virtual std::map<unsigned int, double> findAll(std::string);
 
+protected:
+    struct AVLTreeNode {
+        std::string key;
+        Index::entry nodeentry;
+        AVLTreeNode* left;
+        AVLTreeNode* right;
+        AVLTreeNode* parent;
+        int balance;
+
+        AVLTreeNode():key(NULL),left(NULL),right(NULL),parent(NULL),balance(0) {}
+        //virtual ~AVLTreeNode() {}
+    };
+
 private:
-    AVLTreeNode* search(std::string compkey);
+    Index::entry& search(std::string compkey);
     void insert(AVLTreeNode *n);
     void restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode);
     void adjustBalance(AVLTreeNode *last, AVLTreeNode *first);
@@ -53,6 +53,8 @@ private:
     int treeSize;
     void purge(AVLTreeNode *n);
     void addEntry (const entry e);
+
+
 };
 
 #endif // AVLTREEINDEX_H

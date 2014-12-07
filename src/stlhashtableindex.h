@@ -17,8 +17,8 @@ public:
     virtual void save();
     virtual void load();
     virtual void clear();
-    virtual void find(std::string);
     virtual std::map<unsigned int, double> findAll(std::string);
+
 private:
     std::mutex tableLock;
     std::unordered_map<std::string, entry> table;
