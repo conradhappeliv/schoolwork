@@ -23,7 +23,7 @@ protected:
         std::string keyword;
         std::vector<doc> documents;
     };
-    std::string indexReferenced;
+    std::vector<std::string> references;
 
     static double calcTFIDF(double, double);
     static double calcIDF(unsigned int, unsigned int);
@@ -31,7 +31,7 @@ public:
     Index(std::string filen):filename(filen) {
         pages.reserve(256279);
     }
-    void setIndexFile(std::string filen) { indexReferenced = filen; }
+    void addReference(std::string filen) { references.push_back(filen); }
     virtual void add(const unsigned int, const std::string, const double) = 0;
     void addDoc(const unsigned int, Page*);
     virtual void save() = 0;

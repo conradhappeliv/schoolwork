@@ -31,16 +31,18 @@ void STLHashTableIndex::save() {
         throw std::invalid_argument("file was unable to be opened");
     }
 
-    // get cwd
-    if(indexReferenced[0] != '/') {
-        indexReferenced.insert(0, "/");
-        char c[PATH_MAX];
-        getcwd(c, PATH_MAX);
-        indexReferenced.insert(0, c);
+    for(auto it = references.begin(); it != references.end(); it++) {
+        if((*it)[0] != '/') {
+            (*it).insert(0, "/");
+            char c[PATH_MAX];
+            getcwd(c, PATH_MAX);
+            (*it).insert(0, c);
+        }
+        fout << *it << std::endl;
     }
 
     // write out all data to file
-    fout << indexReferenced << std::endl;
+    fout << "ENDREFS" << std::endl;
     for (auto i = table.begin(); i != table.end(); i++) {
         fout << i->first << ";";
         for (auto j = i->second.documents.begin(); j != i->second.documents.end(); j++) {
@@ -61,9 +63,13 @@ void STLHashTableIndex::load() {
     }
 
     // read in index from file
-    std::getline(fin, indexReferenced);
+    std::string ref;
+    do {
+        std::getline(fin, ref);
+        if(ref != "ENDREFS") this->addReference(ref);
+    } while(ref != "ENDREFS");
     std::thread parse = std::thread([&]() {
-        XMLParser parser(indexReferenced, this);
+        XMLParser parser(references, this);
         parser.parse();
         parser.addDocsNoProcessing();
     });

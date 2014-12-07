@@ -76,9 +76,11 @@ int main(int argc, char* argv[])
 
         if(indexType == HASHTABLE) index = new STLHashTableIndex(indexpath);
         // else if(indexType == AVLTREE) index = TODO:
-        std::cout << "Loading " << indexpath << std::endl;
+        std::cout << "Loading " << indexpath;
+        std::flush(std::cout);
         index->load();
-        std::cout << "Index loaded." << std::endl;
+        std::cout << "\r";
+        std::flush(std::cout);
 
         queryprocessor2 query_me(index);
 

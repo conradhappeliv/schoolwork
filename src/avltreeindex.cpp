@@ -235,15 +235,19 @@ void AVLTreeIndex::save() {
         exit(1);
     } else {std::cout << filename << " successfully opened." << std::endl;}
 
-    if(indexReferenced[0] != '/') {
-        indexReferenced.insert(0, "/");
-        char c[PATH_MAX];
-        getcwd(c, PATH_MAX);
-        indexReferenced.insert(0, c);
+    for(auto it = references.begin(); it != references.end(); it++) {
+        if((*it)[0] != '/') {
+            (*it).insert(0, "/");
+            char c[PATH_MAX];
+            getcwd(c, PATH_MAX);
+            (*it).insert(0, c);
+        }
+        fout << *it << std::endl;
     }
 
+
     // write out all data to file
-    fout << indexReferenced << std::endl;
+    fout << "ENDREFS" << std::endl;
     dumpTree(fout, root);
     std::cout << "index written to file." << std::endl;
     fout.close();
@@ -258,7 +262,11 @@ void AVLTreeIndex::load() {
     } else {std::cout << filename << " successfully opened." << std::endl;}
 
     // read in index from file
-    std::getline(fin, indexReferenced);
+    std::string ref;
+    do {
+        std::getline(fin, ref);
+        if(ref != "ENDREFS") this->addReference(ref);
+    } while(ref != "ENDREFS");
     while (!fin.eof()) {
         entry e;
         std::string keyword_in, idf_in, id_in, tf_in;

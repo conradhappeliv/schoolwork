@@ -12,46 +12,53 @@
 #include "processor.h"
 
 XMLParser::XMLParser(std::string filen, Index* inde) {
-    filename = filen;
+    filenames.push_back(filen);
+    index = inde;
+}
+
+XMLParser::XMLParser(std::vector<std::string> filens, Index* inde) {
+    filenames = filens;
     index = inde;
 }
 
 void XMLParser::parse() {
-    xmlpp::TextReader reader(filename);
-    while(reader.read()) {
-        if(reader.get_name() == "page") { // start of page
-            unsigned int id;
-            std::string title;
-            std::string text;
-            std::string timestamp;
-            std::string username;
+    for(auto it = filenames.begin(); it != filenames.end(); it++) {
+        xmlpp::TextReader reader(*it);
+        while(reader.read()) {
+            if(reader.get_name() == "page") { // start of page
+                unsigned int id;
+                std::string title;
+                std::string text;
+                std::string timestamp;
+                std::string username;
 
-            bool stillReading = true;
-            do stillReading = reader.read();
-            while(reader.get_name() != "title" && stillReading);
-            title = reader.read_string();
-            do stillReading = reader.read();
-            while(reader.get_name() != "id" && stillReading);
-            id = std::atoi(reader.read_string().raw().c_str());
-            do stillReading = reader.read();
-            while(reader.get_name() != "timestamp" && stillReading);
-            timestamp = reader.read_string();
-            do stillReading = reader.read();
-            while(reader.get_name() != "username" && stillReading);
-            username = reader.read_string();
-            do stillReading = reader.read();
-            while(reader.get_name() != "text" && stillReading);
-            text = reader.read_string();
+                bool stillReading = true;
+                do stillReading = reader.read();
+                while(reader.get_name() != "title" && stillReading);
+                title = reader.read_string();
+                do stillReading = reader.read();
+                while(reader.get_name() != "id" && stillReading);
+                id = std::atoi(reader.read_string().raw().c_str());
+                do stillReading = reader.read();
+                while(reader.get_name() != "timestamp" && stillReading);
+                timestamp = reader.read_string();
+                do stillReading = reader.read();
+                while(reader.get_name() != "username" && stillReading);
+                username = reader.read_string();
+                do stillReading = reader.read();
+                while(reader.get_name() != "text" && stillReading);
+                text = reader.read_string();
 
-            Page* p = new Page;
-            p->body = text;
-            p->date = timestamp;
-            p->id = id;
-            p->title = title;
-            p->username = username;
-            TBPLock.lock();
-            toBeProcessed.push(p);
-            TBPLock.unlock();
+                Page* p = new Page;
+                p->body = text;
+                p->date = timestamp;
+                p->id = id;
+                p->title = title;
+                p->username = username;
+                TBPLock.lock();
+                toBeProcessed.push(p);
+                TBPLock.unlock();
+            }
         }
     }
     finished = true;
@@ -62,7 +69,7 @@ bool XMLParser::complete() {
 }
 
 void XMLParser::beginProcessing() {
-    index->setIndexFile(filename);
+    for(auto it = filenames.begin(); it != filenames.end(); it++) index->addReference(*it);
     while(finished);
     Processor::process(toBeProcessed, TBPLock, &finished, index);
 }

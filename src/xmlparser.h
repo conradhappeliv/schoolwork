@@ -14,13 +14,15 @@
 class XMLParser {
 public:
     XMLParser(std::string, Index*);
+    XMLParser(std::vector<std::string>, Index*);
     void parse();
     bool complete();
     void beginProcessing();
     void threadedParseAndProcess();
     void addDocsNoProcessing();
 private:
-    std::string filename;
+    std::vector<std::string> filenames;
+    //std::string filename;
     Index* index;
     int count = 0;
     bool finished = false;
