@@ -1,0 +1,4 @@
+<map id="Index" name="Index">
+<area shape="rect" id="node2" href="$class_a_v_l_tree_index.html" title="{AVLTreeIndex\n||+ AVLTreeIndex()\l+ ~AVLTreeIndex()\l+ add()\l+ save()\l+ load()\l+ clear()\l+ findAll()\l}" alt="" coords="5,352,139,517"/>
+<area shape="rect" id="node3" href="$class_s_t_l_hash_table_index.html" title="{STLHashTableIndex\n||+ STLHashTableIndex()\l+ add()\l+ save()\l+ load()\l+ clear()\l+ findAll()\l+ loaded()\l}" alt="" coords="163,352,324,517"/>
+</map>
