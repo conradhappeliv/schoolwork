@@ -20,8 +20,11 @@ public:
     virtual std::map<unsigned int, double> findAll(std::string);
     bool loaded();
 private:
+    /// needed for threads
     std::mutex tableLock;
+    /// actual index
     std::unordered_map<std::string, entry> table;
+    /// used for more efficient loading from file
     void addEntry(const entry);
     bool finishedLoading = true;
 };

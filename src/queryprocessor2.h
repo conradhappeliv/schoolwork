@@ -8,10 +8,14 @@
 class queryprocessor2
 {
 public:
-    queryprocessor2(Index* index):theIndex(index) {};
+    /// constructor take a reference to an index from which it should query
+    queryprocessor2(Index* index):theIndex(index) {}
+    /// given line query, returns a vector of page ids matching query
     std::vector<unsigned int> processQuery(std::string);
 private:
+    /// reference to index to run queries on
     Index* theIndex;
+    /// returns true for AND, OR, NOT
     bool isQueryOp(const std::string);
 };
 

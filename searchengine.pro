@@ -32,7 +32,7 @@ SOURCES += src/main.cpp \
     src/queryprocessor2.cpp
 
 HEADERS += src/index.h \
-    lib/getopt_pp.h\
+    lib/getopt_pp.h \
     lib/c_threadsafe_porter.h \
     src/xmlparser.h\
     src/processor.h\
