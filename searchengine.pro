@@ -23,21 +23,20 @@ LIBS += -lxml++-2.6 \
 
 SOURCES += src/main.cpp \
     lib/getopt_pp.cpp \
-    src/index.cpp\
-    src/xmlparser.cpp\
-    src/processor.cpp\
-    src/avltreeindex.cpp\
-    src/queryprocessor.cpp \
+    src/index.cpp \
+    src/xmlparser.cpp \
+    src/processor.cpp \
+    src/avltreeindex.cpp \
     src/stlhashtableindex.cpp \
     src/stresstest.cpp \
     src/queryprocessor2.cpp
 
 HEADERS += src/index.h \
-    lib/getopt_pp.h\
+    lib/getopt_pp.h \
     lib/c_threadsafe_porter.h \
-    src/xmlparser.h\
-    src/processor.h\
-    src/Page.h\
+    src/xmlparser.h \
+    src/processor.h \
+    src/Page.h \
     src/queryprocessor.h \
     src/avltree.h \
     src/stlhashtableindex.h \
