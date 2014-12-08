@@ -27,7 +27,6 @@ SOURCES += src/main.cpp \
     src/xmlparser.cpp\
     src/processor.cpp\
     src/avltreeindex.cpp\
-    src/queryprocessor.cpp \
     src/stlhashtableindex.cpp \
     src/stresstest.cpp \
     src/queryprocessor2.cpp
@@ -38,7 +37,6 @@ HEADERS += src/index.h \
     src/xmlparser.h\
     src/processor.h\
     src/Page.h\
-    src/queryprocessor.h \
     src/avltree.h \
     src/stlhashtableindex.h \
     src/stresstest.h \

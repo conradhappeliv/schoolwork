@@ -64,22 +64,22 @@ void AVLTreeIndex::insert(AVLTreeNode* newNode)
         if (temp->key.compare(newNode->key) < 0) temp = temp->right;
         else if (temp->key.compare(newNode->key) > 0) temp = temp->left;
         else if (temp->key.compare(newNode->key) == 0) {
-            std::cout << "node already exists" << std::endl;
+            //std::cout << "node already exists" << std::endl;
             break;
         }
     }
-
+;
     newNode->parent = prev; // set parent
     if (newNode->key.compare(prev->key) < 0) prev->left = newNode; // insert left
     else prev->right = newNode; // insert right
 
     treeSize++;
-    restoreBalance(parent, newNode); // restores balance of AVL tree
+    restoreBalance(prev, newNode); // restores balance of AVL tree
 }
 
 void AVLTreeIndex::restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode)
 {
-    // case 1: parent DNE, root node case, newNode unbalances
+    // case 1: parent DNE, newNode unbalances
     if (parent == NULL) {
         if (newNode->key < root->key) root->balance = biasleft; // newNode inserted left of root
         else root->balance = biasright; // newNode inserted right of root
@@ -120,7 +120,7 @@ void AVLTreeIndex::restoreBalance(AVLTreeNode *parent, AVLTreeNode *newNode)
     }
 }
 
-// adjust balance for a single rotation
+// adjust balance for a single rotation - ENDLESS LOOP HERE
 void AVLTreeIndex::adjustBalance(AVLTreeNode *last, AVLTreeNode *first)
 {
     AVLTreeNode *temp = first->parent;

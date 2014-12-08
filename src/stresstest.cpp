@@ -55,7 +55,7 @@ StressTest::StressTest(std::string filename) {
                 std::string index_filename;
                 line_stream >> index_filename;
                 if(index_type == HASHTABLE) index = new STLHashTableIndex(index_filename);
-                //else if(index_type == AVLTREE) index = new AVLTreeIndex(index_filename); TODO: uncomment when AVLTree finished
+                else if(index_type == AVLTREE) index = new AVLTreeIndex(index_filename);
                 else throw; // something wrong happened
                 index->load();
                 index_open = true;

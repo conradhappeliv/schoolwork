@@ -31,9 +31,6 @@ protected:
         AVLTreeNode* right;
         AVLTreeNode* parent;
         int balance;
-
-        AVLTreeNode():key(NULL),left(NULL),right(NULL),parent(NULL),balance(0) {}
-        //virtual ~AVLTreeNode() {}
     };
 
 private:
