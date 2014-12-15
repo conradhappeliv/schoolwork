@@ -1,0 +1,5 @@
+*.out
+Makefile (copy)
+*.gch
+*.pro.user
+Project1
