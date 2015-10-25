@@ -169,6 +169,8 @@ def main():
     iteration_num = 0
     # MAIN LOOP
     while packets_to_send or network_active(node_list):
+        if PRINT_STEPS:
+            print("ITERATION "+str(iteration_num+1))
         # send packets if it's their turn
         for packet in packets_to_send[:]:
             if iteration_num == packet[0]:
