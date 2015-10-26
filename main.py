@@ -12,6 +12,7 @@ class Node:
         self.send_queue = list()  # [ (destination, packet_size) ]
         self.in_progress = list()  # [ {send_to, destination, amount_left, packet_size} ]
         self.recv_queue = dict()  # { (src, dest) -> cur_amount }
+        self.dont_do_yet = list()  # [ dest ]
 
     def __repr__(self):
         return "Node " + str(self.name)
@@ -44,13 +45,14 @@ class Node:
     def process_queue(self):
         iteration_capacity = self.neighbors.copy()
         # transfer what you can
-        for packet in self.in_progress:
+        for packet in (p for p in self.in_progress if p["destination"] not in self.dont_do_yet):
             amount_possible = min(packet["amount_left"], iteration_capacity[packet["send_to"]])
             if amount_possible:
                 if (self, packet["destination"]) not in packet["send_to"].recv_queue:
                     packet["send_to"].recv_queue[(self, packet["destination"])] = 0
                 if packet["amount_left"] - amount_possible == 0:  # it finishes sending on this iteration
                     del packet["send_to"].recv_queue[(self, packet["destination"])]
+                    packet["send_to"].dont_do_yet.append(packet["destination"])
                     if packet["send_to"] is not packet["destination"]:
                         packet["send_to"].send_queue.append((packet["destination"], packet["packet_size"]))
                 packet["amount_left"] -= amount_possible
@@ -63,7 +65,6 @@ class Node:
         for packet in self.in_progress[:]:
             if packet["amount_left"] == 0:
                 self.in_progress.remove(packet)
-
 
     def loop_step(self):
         self.route_packets()
@@ -207,9 +208,11 @@ def main(filename=""):
                 packets_to_send.remove(packet)
         for node in node_list:
             node.loop_step()
+        for node in node_list:
+            node.dont_do_yet = list()
         iteration_num += 1
     print("Simulation took "+str(iteration_num)+" iterations")
 
 
 if __name__ == "__main__":
-    main(filename="./testNetwork.csv")
+    main(filename="/home/conrad/PycharmProjects/CSE4344/testNetwork.csv")
