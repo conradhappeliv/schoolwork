@@ -1,4 +1,5 @@
 import random
+import csv
 
 PRINT_STEPS = True
 
@@ -146,6 +147,31 @@ def set_up_network(node_list, network):
                 print(str(node)+" -> "+str(neighbor)+": "+str(path_len))
 
 
+def find_or_create_node(name, node_list, names):
+    if name not in names:
+        new_node = Node(name)
+        names.add(name)
+        node_list.append(new_node)
+        return new_node
+    else:
+        for node in node_list:
+            if node.name == name:
+                return node
+
+
+def load_from_file(filename):
+    node_list = list()
+    network = list()
+    names = set()
+    with open(filename) as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            node1 = find_or_create_node(row[0], node_list, names)
+            node2 = find_or_create_node(row[1], node_list, names)
+            network.append((node1, node2, int(row[2])))
+    return node_list, network
+
+
 def send_packet(src, dest, size):
     src.send_queue.append((dest, size))
 
@@ -156,8 +182,11 @@ def network_active(node_list):
             return True
 
 
-def main():
-    node_list, network = create_network(nodes=9, fixed_capacity=1)
+def main(filename=""):
+    if filename:
+        node_list, network = load_from_file(filename)
+    else:
+        node_list, network = create_network(nodes=9, fixed_capacity=1)
     set_up_network(node_list, network)
 
     packets_to_send = [  # (iteration#, source, dest, size)
@@ -183,4 +212,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(filename="./testNetwork.csv")
