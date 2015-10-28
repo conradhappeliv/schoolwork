@@ -4,7 +4,7 @@ import scipy.io.wavfile as wav
 
 
 def sin():
-    sin_frequency = 40
+    sin_frequency = 400
     sample_freq = 8000
     t = pl.arange(0., 1., 1./sample_freq)
     msg = pl.sin(2*pl.pi*sin_frequency*t)
@@ -37,3 +37,6 @@ class Message():
         self.fs = sample_frequency
         self.t = t
         self.msg = msg
+
+    def write(self, filename='audio.wav'):
+        wav.write(filename, self.fs, self.msg)
