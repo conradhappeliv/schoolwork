@@ -21,6 +21,26 @@ def square():
     return msg
 
 
+def triangle():
+    triangle_frequency = 250
+    sample_freq = 8000
+    t = pl.arange(0., 1., 1./sample_freq)
+    msg = np.zeros(len(t))
+
+    # triangle generation
+    direction = 1
+    for x in range(len(t)):
+        if x == 0:
+            msg[x] = 0
+        else:
+            msg[x] = msg[x-1] + 1/triangle_frequency * direction
+        if msg[x] >= 1 or msg[x] <= -1:
+            direction *= -1
+            
+    msg = Message(sample_freq, t, msg)
+    return msg
+
+
 def pulse_train():
     pass
 
