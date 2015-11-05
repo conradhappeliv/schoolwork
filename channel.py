@@ -2,6 +2,14 @@ import numpy as np
 import random
 
 
+def gauss_noise(m, SNR=10):
+    for i in range(len(m.msg)):
+        max_amp = 1./SNR*m.msg[i]
+        noise = random.uniform(0, max_amp) - max_amp/2
+        m.msg[i] += noise
+    return m
+
+
 def attenuation(m):
     m.msg = np.multiply(m.msg, 10**-6)
     return m
