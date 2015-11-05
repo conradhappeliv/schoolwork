@@ -1,6 +1,7 @@
 import pylab as pl
 import numpy as np
 import scipy.io.wavfile as wav
+import random
 
 
 def sin():
@@ -36,13 +37,41 @@ def triangle():
             msg[x] = msg[x-1] + 1/triangle_frequency * direction
         if msg[x] >= 1 or msg[x] <= -1:
             direction *= -1
-            
+
     msg = Message(sample_freq, t, msg)
     return msg
 
 
 def pulse_train():
-    pass
+    duty_cycle = 1./6  # expects a number less than 1
+    pulse_freq = 250
+    sample_freq = 8000
+    t = pl.arange(0., 1., 1./sample_freq)
+    msg = np.zeros(len(t))
+
+    # generation
+    for x in range(len(t)):
+        new_x = x % pulse_freq
+        if new_x < duty_cycle*pulse_freq:
+            msg[x] = 1
+        else:
+            msg[x] = 0
+
+    msg = Message(sample_freq, t, msg)
+    return msg
+
+
+def PR_pulse_train():
+    sample_freq = 300
+    t = pl.arange(0., 1., 1./sample_freq)
+    msg = np.zeros(len(t))
+
+    # generation
+    for x in range(len(t)):
+        msg[x] = round(random.random())
+
+    msg = Message(sample_freq, t, msg)
+    return msg
 
 
 def voice():
