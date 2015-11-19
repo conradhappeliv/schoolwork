@@ -5,8 +5,8 @@ import random
 
 
 def sin():
-    sin_frequency = 400
-    sample_freq = 8000
+    sin_frequency = 440
+    sample_freq = 44100
     t = pl.arange(0., 1., 1./sample_freq)
     msg = pl.sin(2*pl.pi*sin_frequency*t)
     msg = Message(sample_freq, t, msg)
@@ -15,7 +15,7 @@ def sin():
 
 def square():
     square_frequency = 40
-    sample_freq = 8000
+    sample_freq = 44100
     t = pl.arange(0., 1., 1./sample_freq)
     msg = pl.sign(pl.sin(2*pl.pi*square_frequency*t))  # sign rounds to -1 or 1
     msg = Message(sample_freq, t, msg)
@@ -24,7 +24,7 @@ def square():
 
 def triangle():
     triangle_frequency = 250
-    sample_freq = 8000
+    sample_freq = 44100
     t = pl.arange(0., 1., 1./sample_freq)
     msg = np.zeros(len(t))
 
@@ -45,7 +45,7 @@ def triangle():
 def pulse_train():
     duty_cycle = 1./6  # expects a number less than 1
     pulse_freq = 250
-    sample_freq = 8000
+    sample_freq = 44100
     t = pl.arange(0., 1., 1./sample_freq)
     msg = np.zeros(len(t))
 
@@ -62,7 +62,7 @@ def pulse_train():
 
 
 def PR_pulse_train():
-    sample_freq = 300
+    sample_freq = 44100
     t = pl.arange(0., 1., 1./sample_freq)
     msg = np.zeros(len(t))
 
