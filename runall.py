@@ -18,3 +18,10 @@ for msg in [message.sin, message.square, message.triangle, message.pulse_train, 
     m = receiver.lpf(m)
     m.write(filename='audio/'+message_name+'_lpf.wav')
     plot_both(m, filename='plots/'+message_name+'_lpf.png')
+
+    for fn in [channel.attenuation, channel.fading, channel.gauss_noise]:
+        function_name = str(fn).split()[1]
+        original_message = msg()
+        m = fn(original_message)
+        m.write(filename='audio/'+message_name+'_'+function_name+'.wav')
+        plot_both(m, filename='plots/'+message_name+'_'+function_name+'.png')
