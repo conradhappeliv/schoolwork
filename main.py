@@ -2,16 +2,18 @@ import message
 import mixer
 import channel
 import receiver
-from plots import plot_before_after, show
+from plots import plot_before_after, plot_before_after_amqam, show
 
 # message
-orig = message.sin()
-m = message.sin()
+orig1 = message.sin(10)
+orig2 = message.square(10)
+m1 = message.sin(10)
+m2 = message.square(10)
 #plot_both(m, "Before")
 #show()
 
 # mixer
-m = mixer.modulate(m)
+m = mixer.AMQAM(m1, m2)
 
 # channel
 #m = channel.attenuation(m)
@@ -19,10 +21,11 @@ m = mixer.modulate(m)
 #m = channel.gauss_noise(m)
 
 # receiver
-m = mixer.modulate(m)
+m1, m2 = receiver.demuxAMQAM(m)
 #m = receiver.unattenuate(m)
-m = receiver.lpf(m)
+m1 = receiver.lpf(m1)
+m2 = receiver.lpf(m2)
 #plot_both(m, "After")
-plot_before_after(orig, m)
+plot_before_after_amqam(orig1, orig2, m1, m2)
 show()
 m.write()
