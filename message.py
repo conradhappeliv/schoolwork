@@ -4,9 +4,11 @@ import scipy.io.wavfile as wav
 import random
 
 
+
 def sin(sin_frequency=440):
     sample_freq = 44100
-    t = pl.arange(0., .5, 1./sample_freq)
+    end = 6./sin_frequency
+    t = pl.arange(0., end, 1./sample_freq)
     msg = pl.sin(2*pl.pi*sin_frequency*t)
     msg = Message(sample_freq, t, msg)
     return msg
@@ -14,7 +16,8 @@ def sin(sin_frequency=440):
 
 def square(square_frequency=40):
     sample_freq = 44100
-    t = pl.arange(0., .5, 1./sample_freq)
+    end = 6./square_frequency
+    t = pl.arange(0., end, 1./sample_freq)
     msg = pl.sign(pl.sin(2*pl.pi*square_frequency*t))  # sign rounds to -1 or 1
     msg = Message(sample_freq, t, msg)
     return msg
@@ -22,7 +25,8 @@ def square(square_frequency=40):
 
 def triangle(triangle_frequency=250):
     sample_freq = 44100
-    t = pl.arange(0., .1, 1./sample_freq)
+    end = 6./triangle_frequency
+    t = pl.arange(0., end, 1./sample_freq)
     msg = np.zeros(len(t))
 
     # triangle generation
@@ -31,7 +35,7 @@ def triangle(triangle_frequency=250):
         if x == 0:
             msg[x] = 0
         else:
-            msg[x] = msg[x-1] + 1/triangle_frequency * direction
+            msg[x] = msg[x-1] + end * direction
         if msg[x] >= 1 or msg[x] <= -1:
             direction *= -1
 
@@ -42,7 +46,8 @@ def triangle(triangle_frequency=250):
 def pulse_train(pulse_freq=250):
     duty_cycle = 1./6  # expects a number less than 1
     sample_freq = 44100
-    t = pl.arange(0., 1., 1./sample_freq)
+    end = 6./pulse_freq - 1/pulse_freq
+    t = pl.arange(0., end, 1./sample_freq)
     msg = np.zeros(len(t))
 
     # generation
@@ -59,7 +64,7 @@ def pulse_train(pulse_freq=250):
 
 def PR_pulse_train():
     sample_freq = 44100
-    t = pl.arange(0., 1., 1./sample_freq)
+    t = pl.arange(0., .01, 1./sample_freq)
     msg = np.zeros(len(t))
 
     # generation

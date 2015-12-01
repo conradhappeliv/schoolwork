@@ -15,7 +15,7 @@ def plot_freq(plot, msg):
     spacing = 1./msg.fs
     x = np.linspace(0, 1./(2*spacing), length/2)
     y = np.fft.fft(msg.msg)
-    plot.plot(x[1:], 2.0/length * np.abs(y[0:length/2])[1:])
+    plot.plot(x, 2.0/length * np.abs(y[0:length/2]))
 
 
 def plot_both(msg, title="", filename=""):
@@ -30,7 +30,7 @@ def plot_both(msg, title="", filename=""):
     spacing = 1./msg.fs
     x = np.linspace(0, 1./(2*spacing), length/2)
     y = np.fft.fft(msg.msg)
-    axes[1].plot(x[1:], 2.0/length * np.abs(y[0:length/2])[1:])
+    axes[1].plot(x, 2.0/length * np.abs(y[0:length/2]))
     axes[1].set_xlabel("Freq (Hz)")
     axes[1].set_ylabel("|Y(freq)|")
     if filename: plot.savefig(filename)
