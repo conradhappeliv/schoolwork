@@ -4,7 +4,7 @@ import scipy.io.wavfile as wav
 import random
 
 
-
+# Sinusoidal message wave
 def sin(sin_frequency=440):
     sample_freq = 44100
     end = 6./sin_frequency
@@ -14,7 +14,8 @@ def sin(sin_frequency=440):
     return msg
 
 
-def square(square_frequency=40):
+# Square message wave
+def square(square_frequency=440):
     sample_freq = 44100
     end = 6./square_frequency
     t = pl.arange(0., end, 1./sample_freq)
@@ -23,7 +24,8 @@ def square(square_frequency=40):
     return msg
 
 
-def triangle(triangle_frequency=250):
+# Triangular message wave
+def triangle(triangle_frequency=440):
     sample_freq = 44100
     end = 6./triangle_frequency
     t = pl.arange(0., end, 1./sample_freq)
@@ -43,8 +45,9 @@ def triangle(triangle_frequency=250):
     return msg
 
 
+# Pulse-train message wave
 def pulse_train(pulse_freq=250):
-    duty_cycle = 1./6  # expects a number less than 1
+    duty_cycle = 1./6  # Amount of time spent "on" - expects a number less than 1
     sample_freq = 44100
     end = 6./pulse_freq - 1/pulse_freq
     t = pl.arange(0., end, 1./sample_freq)
@@ -62,6 +65,7 @@ def pulse_train(pulse_freq=250):
     return msg
 
 
+# Generates a pseudo-random stream of ones and zeros (kind of mimics white noise)
 def PR_pulse_train():
     sample_freq = 44100
     t = pl.arange(0., .01, 1./sample_freq)
@@ -75,6 +79,7 @@ def PR_pulse_train():
     return msg
 
 
+# Loads an audio signal from a file into a message
 def voice():
     rate, data = wav.read('name.wav')
     data = data[:, 0]

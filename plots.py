@@ -2,12 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plot
 
 
+# plots the signal in the time domain
 def plot_time(plot, msg):
     plot.set_xlabel("Time")
     plot.set_ylabel("Amplitude")
     plot.plot(msg.t, msg.msg)
 
 
+# plots the signal in the positive frequency domain
 def plot_freq(plot, msg):
     plot.set_xlabel("Freq (Hz)")
     plot.set_ylabel("|Y(freq)|")
@@ -18,6 +20,7 @@ def plot_freq(plot, msg):
     plot.plot(x, 2.0/length * np.abs(y[0:length/2]))
 
 
+# using subplots, plots signal in both time and frequency domain (optionally saves it to a file)
 def plot_both(msg, title="", filename=""):
     plots, axes = plot.subplots(2, 1)
     if title: plot.title(title)
@@ -36,6 +39,7 @@ def plot_both(msg, title="", filename=""):
     if filename: plot.savefig(filename)
 
 
+# plots two signals in both the time and frequency domain for comparison
 def plot_before_after(before, after):
     plots, axes = plot.subplots(2, 2)
 
@@ -45,6 +49,8 @@ def plot_before_after(before, after):
     plot_time(axes[1][0], after)
     plot_freq(axes[1][1], after)
 
+
+# plots two message signals before and after AM-QAM in both the time and frequency domain for comparison
 def plot_before_after_amqam(before1, before2, after1, after2, filename=''):
     plots, axes = plot.subplots(4, 2)
 
@@ -62,5 +68,7 @@ def plot_before_after_amqam(before1, before2, after1, after2, filename=''):
 
     if filename: plots.savefig(filename)
 
+
+# mimics the "show" functionality in Matlab - aka plots won't show up until this is called (do multiple plots at once)
 def show():
     plot.show()
