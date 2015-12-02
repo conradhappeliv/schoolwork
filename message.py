@@ -1,6 +1,7 @@
 import pylab as pl
 import numpy as np
 import scipy.io.wavfile as wav
+import scipy.signal as signal
 import random
 
 
@@ -32,18 +33,7 @@ def triangle(triangle_frequency=440, length=0):
     if length: end = length
     else: end = 6./triangle_frequency
     t = pl.arange(0., end, 1./sample_freq)
-    msg = np.zeros(len(t))
-
-    # triangle generation
-    direction = 1
-    for x in range(len(t)):
-        if x == 0:
-            msg[x] = 0
-        else:
-            msg[x] = msg[x-1] + end * direction
-        if msg[x] >= 1 or msg[x] <= -1:
-            direction *= -1
-
+    msg = np.abs(2*signal.sawtooth(t*2*np.pi*triangle_frequency-np.pi/2)) - 1
     msg = Message(sample_freq, t, msg)
     return msg
 
