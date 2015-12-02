@@ -24,5 +24,6 @@ def lpf(m):
     (N, Wn) = signal.buttord(wp=norm_pass, ws=1.5*norm_pass, gpass=2, gstop=50, analog=0)
     (b, a) = signal.butter(N, Wn, btype='lowpass', analog=0, output='ba')
     m.msg = signal.lfilter(b, a, m.msg)
+    m.msg *= 1.0/np.abs(m.msg).max()
     return m
 

@@ -80,9 +80,10 @@ def PR_pulse_train():
 
 
 # Loads an audio signal from a file into a message
-def voice():
-    rate, data = wav.read('name.wav')
-    data = data[:, 0]
+def voice(filename="name.wav"):
+    rate, data = wav.read(filename)
+    try: data = data[:, 0]
+    except: pass
     msg = Message(rate, np.arange(0., len(data)/rate, 1/rate), data)
     return msg
 
