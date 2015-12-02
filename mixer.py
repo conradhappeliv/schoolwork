@@ -20,10 +20,12 @@ def AMQAM(m1, m2):
             if m1.fs > m2.fs:
                 total_samps = len(m2.msg)/m2.fs*m1.fs
                 m2.msg, m2.t = signal.resample(m2.msg, total_samps, m2.t)
+                m2.orig_len = len(m2.t)
                 m2.fs = m1.fs
             else:
                 total_samps = len(m1.msg)/m1.fs*m2.fs
                 m1.msg, m1.t = signal.resample(m1.msg, total_samps, m1.t)
+                m2.orig_len = len(m2.t)
                 m1.fs = m2.fs
 
         if len(m1.msg) != len(m2.msg):
@@ -43,4 +45,5 @@ def AMQAM(m1, m2):
     m1 = modulate(m1)
     # Modulate the second signal and add it to the resulting signal
     m1.msg += m2.msg*np.cos(2*np.pi*carrier_freq*m2.t)
+    m1.orig_len2 = m2.orig_len
     return m1

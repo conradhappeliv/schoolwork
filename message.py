@@ -87,6 +87,8 @@ class Message():
         self.fs = sample_frequency
         self.t = t
         self.msg = msg
+        self.orig_len = len(t)
+        self.orig_len2 = len(t)
 
     def write(self, filename='audio.wav'):
         wav.write(filename, self.fs, self.msg)

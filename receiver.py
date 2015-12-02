@@ -6,8 +6,8 @@ import numpy as np
 
 # Returns both signals that were modulated orthogonally in a single carrier signal
 def demuxAMQAM(m):
-    m1 = Message(m.fs, m.t, 2 * m.msg * np.sin(2*np.pi*carrier_freq*m.t))
-    m2 = Message(m.fs, m.t, 2 * m.msg * np.cos(2*np.pi*carrier_freq*m.t))
+    m1 = Message(m.fs, m.t[:m.orig_len], (2 * m.msg * np.sin(2*np.pi*carrier_freq*m.t))[:m.orig_len])
+    m2 = Message(m.fs, m.t[:m.orig_len2], (2 * m.msg * np.cos(2*np.pi*carrier_freq*m.t))[:m.orig_len2])
     return m1, m2
 
 
