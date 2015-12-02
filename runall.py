@@ -4,27 +4,33 @@ import channel
 import receiver
 from plots import plot_both, plot_before_after_amqam
 
-types = [message.sin, message.square, message.triangle, message.pulse_train, message.PR_pulse_train, message.voice]
+types = [message.voice, message.sin, message.square, message.triangle, message.pulse_train, message.PR_pulse_train]
 
 for msg in types:
     message_name = str(msg).split()[1]
     original_message = msg()
-    original_message.write(filename='audio/'+message_name+'_orig.wav')
+    original_message_aud = msg(length=2)
+    original_message_aud.write(filename='audio/'+message_name+'_orig.wav')
     plot_both(original_message, filename='plots/'+message_name+'_orig.png')
     m = mixer.modulate(original_message)
-    m.write(filename='audio/'+message_name+'_mod1.wav')
+    m_aud = mixer.modulate(original_message_aud)
+    m_aud.write(filename='audio/'+message_name+'_mod1.wav')
     plot_both(m, filename='plots/'+message_name+'_mod1.png')
-    m = mixer.modulate(original_message)
-    m.write(filename='audio/'+message_name+'_mod2.wav')
+    m = mixer.modulate(m)
+    m_aud = mixer.modulate(m_aud)
+    m_aud.write(filename='audio/'+message_name+'_mod2.wav')
     plot_both(m, filename='plots/'+message_name+'_mod2.png')
     m = receiver.lpf(m)
-    m.write(filename='audio/'+message_name+'_lpf.wav')
+    m_aud = receiver.lpf(m_aud)
+    m_aud.write(filename='audio/'+message_name+'_lpf.wav')
     plot_both(m, filename='plots/'+message_name+'_lpf.png')
     for fn in [channel.attenuation, channel.fading, channel.gauss_noise]:
         function_name = str(fn).split()[1]
         original_message = msg()
+        original_message_aud = msg(length=2)
         m = fn(original_message)
-        m.write(filename='audio/'+message_name+'_'+function_name+'.wav')
+        m_aud = fn(original_message_aud)
+        m_aud.write(filename='audio/'+message_name+'_'+function_name+'.wav')
         plot_both(m, filename='plots/'+message_name+'_'+function_name+'.png')
 
 #am-qam
