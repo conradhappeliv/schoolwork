@@ -38,15 +38,21 @@ for ind1 in range(len(types)):
     msg1 = types[ind1]
     name1 = str(msg1).split()[1]
     orig1 = msg1()
-    orig1.write(filename='audio/qam/'+name1+'_orig.wav')
+    orig1aud = msg1(length=2)
+    orig1aud.write(filename='audio/qam/'+name1+'_orig.wav')
     plot_both(orig1, filename='plots/qam/'+name1+'_orig.png')
     for msg2 in types[ind1:]:
         name2 = str(msg2).split()[1]
         orig2 = msg2()
+        orig2aud = msg2(length=2)
         m = mixer.AMQAM(msg1(), msg2())
+        maud = mixer.AMQAM(msg1(length=2), msg2(length=2))
         m1, m2 = receiver.demuxAMQAM(m)
+        m1aud, m2aud = receiver.demuxAMQAM(maud)
         m1 = receiver.lpf(m1)
         m2 = receiver.lpf(m2)
-        m1.write(filename='audio/qam/'+name1+'_'+name2+'_msg1.wav')
-        m2.write(filename='audio/qam/'+name1+'_'+name2+'_msg2.wav')
+        m1aud = receiver.lpf(m1aud)
+        m2aud = receiver.lpf(m2aud)
+        m1aud.write(filename='audio/qam/'+name1+'_'+name2+'_msg1.wav')
+        m2aud.write(filename='audio/qam/'+name1+'_'+name2+'_msg2.wav')
         plot_before_after_amqam(orig1, orig2, m1, m2, filename='plots/qam/'+name1+'_'+name2+'.png')
