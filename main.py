@@ -1,5 +1,7 @@
 import random
 import csv
+import random
+from queue import PriorityQueue
 
 PRINT_STEPS = True
 
@@ -13,6 +15,7 @@ class Packet:
         self.amount_left = size
         self.size = size
         self.time_waited = 0
+        self.path = list()
 
     def __repr__(self):
         return "Packet (Size "+self.size+", src: "+self.source+", dest: "+self.destination+")"
@@ -44,27 +47,17 @@ class Node:
 
     def route_packets(self):
         for packet in self.send_queue[:]:
-            if packet.destination in self.lookup_table:
-                packet.next_node = self.lookup_table[packet.destination][0]
-                self.in_progress.append(packet)
+            for i in range(len(packet.path)):
+                if packet.path[i] == self:
+                    packet.next_node = packet.path[i+1]
+                    self.in_progress.append(packet)
+                    self.send_queue.remove(packet)
+                    break
             else:
                 print("IMPOSSIBLE TO ROUTE FROM "+str(self)+" TO "+str(packet.destination))
-            self.send_queue.remove(packet)
-
-    def order_queue(self):
-        self.smallest_first()
-        self.in_progress.sort(key=lambda x: x.amount_left == x.size)
-
-    def biggest_first(self):
-        self.in_progress.sort(key=lambda x: -x.size)
-        self.in_progress.sort(key=lambda x: x.size > self.neighbors[x.next_node])
-
-    def smallest_first(self):
-        self.in_progress.sort(key=lambda x: x.size)
 
     def process_queue(self):
         iteration_capacity = self.neighbors.copy()
-        self.order_queue()
         # transfer what you can
         for packet in (p for p in self.in_progress if p.destination not in self.dont_do_yet):
             packet.time_waited += 1
@@ -87,6 +80,7 @@ class Node:
         # remove completed packets from queue
         for packet in self.in_progress[:]:
             if packet.amount_left == 0:
+                packet.amount_left = packet.size
                 self.in_progress.remove(packet)
 
     def loop_step(self):
@@ -196,7 +190,28 @@ def load_from_file(filename):
     return node_list, network
 
 
-def send_packet(packet):
+def send_packet(packet, taken_up):
+    possibles = find_all_routes(packet.source, packet.destination)
+    random.shuffle(possibles)
+    possibles = sorted(possibles, key=lambda x: x[0])
+    for possible in possibles:
+        packet.path = possible[1]
+        bad = False
+        for i in range(len(packet.path) - 1):
+            if i+1 < len(taken_up) and {packet.path[i], packet.path[i+1]} in taken_up[i+1]:
+                bad = True
+                break
+        if not bad:
+            break
+    else:
+        packet.path = possibles[0][1]
+
+    print("Packet from "+str(packet.source)+" to "+str(packet.destination)+" path: "+str(packet.path))
+
+    for i in range(len(packet.path)-1):
+        if i+2 > len(taken_up):
+            taken_up.append(list())
+        taken_up[i+1].append({packet.path[i], packet.path[i+1]})
     packet.source.send_queue.append(packet)
 
 
@@ -204,6 +219,32 @@ def network_active(node_list):
     for node in node_list:
         if node.send_queue or node.in_progress:
             return True
+
+
+def find_possible_dests(source):
+    return source.neighbors.keys()
+
+
+def find_link_len(source, dest):
+    return source.neighbors[dest]
+
+
+def find_all_routes(source, destination, cur_path=list(), cur_len=0):
+    # return [(length, [path])...]
+    if not cur_path: cur_path = [source]
+    res = list()
+    q = list(set(find_possible_dests(source)) - set(cur_path))
+    for place in q:
+        cur_path.append(place)
+        path_len = find_link_len(cur_path[-2], cur_path[-1])
+        cur_len += path_len
+        if cur_path[-1] is destination:
+            res.append((cur_len, cur_path[:]))
+        else:
+            res.extend(find_all_routes(place, destination, cur_path, cur_len))
+        cur_len -= path_len
+        cur_path.pop()
+    return res
 
 
 def main(filename=""):
@@ -214,33 +255,22 @@ def main(filename=""):
     set_up_network(node_list, network)
 
     packets_to_send = [  # (iteration#, source, dest, size)
-        Packet(0, node_list[0], node_list[8], 1),
-        Packet(0, node_list[0], node_list[8], 1),
-        Packet(0, node_list[0], node_list[8], 9),
-        Packet(0, node_list[0], node_list[8], 1),
-        Packet(0, node_list[0], node_list[8], 5),
-        Packet(0, node_list[0], node_list[8], 7),
-        Packet(0, node_list[0], node_list[8], 5),
-        Packet(0, node_list[0], node_list[8], 5),
-        Packet(0, node_list[0], node_list[8], 4),
-        Packet(0, node_list[0], node_list[8], 2),
-        Packet(0, node_list[0], node_list[8], 2),
-        Packet(0, node_list[0], node_list[8], 4),
-        Packet(0, node_list[0], node_list[8], 10),
-        Packet(0, node_list[0], node_list[8], 5),
-        Packet(0, node_list[0], node_list[8], 5),
-        Packet(0, node_list[0], node_list[8], 10),
-        Packet(0, node_list[0], node_list[8], 3),
-        Packet(0, node_list[0], node_list[8], 2),
-        Packet(0, node_list[0], node_list[8], 8),
-        Packet(0, node_list[0], node_list[8], 4),
-        Packet(0, node_list[0], node_list[8], 5),
-        Packet(0, node_list[0], node_list[8], 9),
-        Packet(0, node_list[0], node_list[8], 10),
-        Packet(0, node_list[0], node_list[8], 5),
+        Packet(0, node_list[0], node_list[6], 10),
+        Packet(0, node_list[0], node_list[6], 10),
+        Packet(0, node_list[0], node_list[6], 10),
+        Packet(1, node_list[0], node_list[6], 10),
+        Packet(1, node_list[0], node_list[6], 10),
+        Packet(1, node_list[0], node_list[6], 10),
+        Packet(2, node_list[0], node_list[6], 10),
+        Packet(2, node_list[0], node_list[6], 10),
+        Packet(2, node_list[0], node_list[6], 10),
+        Packet(3, node_list[0], node_list[6], 10),
+        Packet(3, node_list[0], node_list[6], 10)
     ]
     all_packets = [p for p in packets_to_send]
     iteration_num = 0
+    taken_up = [[]]  # index is turn -> {set(): wait}
+
     # MAIN LOOP
     while packets_to_send or network_active(node_list):
         if PRINT_STEPS:
@@ -248,16 +278,18 @@ def main(filename=""):
         # send packets if it's their turn
         for packet in packets_to_send[:]:
             if iteration_num == packet.turn:
-                send_packet(packet)
+                send_packet(packet, taken_up)
                 packets_to_send.remove(packet)
         for node in node_list:
             node.loop_step()
         for node in node_list:
             node.dont_do_yet = list()
         iteration_num += 1
+        if taken_up:
+            taken_up.pop(0)
     total_time_waited = sum([p.time_waited for p in all_packets])
     print("Simulation took "+str(iteration_num)+" iterations. Total time waited: "+str(total_time_waited))
 
 
 if __name__ == "__main__":
-    main(filename="/home/conrad/PycharmProjects/CSE4344/testNetwork.csv")
+    main(filename="/home/conrad/PycharmProjects/CSE4344/network2.csv")
