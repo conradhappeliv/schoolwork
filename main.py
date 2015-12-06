@@ -1,7 +1,5 @@
-import random
 import csv
 import random
-from queue import PriorityQueue
 
 PRINT_STEPS = True
 
@@ -9,6 +7,7 @@ PRINT_STEPS = True
 class Packet:
     def __init__(self, turn, source, dest, size):
         self.turn = turn
+        self.end_turn = turn
         self.next_node = source
         self.source = source
         self.destination = dest
@@ -34,6 +33,9 @@ class Node:
     def __repr__(self):
         return "Node " + str(self.name)
 
+    def __lt__(self, other):
+        return self.name < other.name
+
     def get_adjacent_nodes(self, network):
         for link in network:
             if link[0] is self or link[1] is self:
@@ -56,7 +58,7 @@ class Node:
             else:
                 print("IMPOSSIBLE TO ROUTE FROM "+str(self)+" TO "+str(packet.destination))
 
-    def process_queue(self):
+    def process_queue(self, iteration_num):
         iteration_capacity = self.neighbors.copy()
         # transfer what you can
         for packet in (p for p in self.in_progress if p.destination not in self.dont_do_yet):
@@ -81,39 +83,12 @@ class Node:
         for packet in self.in_progress[:]:
             if packet.amount_left == 0:
                 packet.amount_left = packet.size
+                packet.end_turn = iteration_num
                 self.in_progress.remove(packet)
 
-    def loop_step(self):
+    def loop_step(self, iteration_num):
         self.route_packets()
-        self.process_queue()
-
-
-def create_network(nodes=9, fixed_capacity=0):
-    """
-    :param nodes: how many nodes in the network
-    :param fixed_capacity: should there be a fixed capacity between nodes (int)
-    :return: list of Nodes, list of (node1, node2, capacity of link)
-    """
-    network = list()
-    node_list = list()
-    for i in range(nodes):
-        node_list.append(Node(i))
-    for i in range(len(node_list)):
-        for j in range(i+1, len(node_list)):
-            # add paths randomly between nodes
-            if (nodes-1) and random.uniform(0, 1) < 1./(nodes-1):
-                network.append((node_list[i], node_list[j], fixed_capacity if fixed_capacity else random.randint(1, 10)))
-
-    # check if any nodes were left out
-    for node in node_list:
-        for link in network:
-            if node is link[0] or node is link[1]:
-                break
-        else:
-            network.append((node, random.choice(list(n for n in node_list if n is not node)), fixed_capacity if fixed_capacity else random.randint(1, 10)))
-    if PRINT_STEPS:
-        print("Created network with "+str(nodes)+" nodes.")
-    return node_list, network
+        self.process_queue(iteration_num)
 
 
 def calculate_paths(node_list, source):
@@ -177,7 +152,7 @@ def find_or_create_node(name, node_list, names):
                 return node
 
 
-def load_from_file(filename):
+def load_network_from_file(filename):
     node_list = list()
     network = list()
     names = set()
@@ -188,6 +163,15 @@ def load_from_file(filename):
             node2 = find_or_create_node(row[1], node_list, names)
             network.append((node1, node2, int(row[2])))
     return node_list, network
+
+
+def load_packets_from_files(filename, node_list):
+    packets = list()
+    with open(filename) as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            packets.append(Packet(int(row[0]), node_list[int(row[1])], node_list[int(row[2])], int(row[3])))
+    return packets
 
 
 def send_packet(packet, taken_up):
@@ -206,7 +190,7 @@ def send_packet(packet, taken_up):
     else:
         packet.path = possibles[0][1]
 
-    print("Packet from "+str(packet.source)+" to "+str(packet.destination)+" path: "+str(packet.path))
+    if PRINT_STEPS: print("Packet from "+str(packet.source)+" to "+str(packet.destination)+" path: "+str(packet.path))
 
     for i in range(len(packet.path)-1):
         if i+2 > len(taken_up):
@@ -229,11 +213,13 @@ def find_link_len(source, dest):
     return source.neighbors[dest]
 
 
+routecache = {}
 def find_all_routes(source, destination, cur_path=list(), cur_len=0):
     # return [(length, [path])...]
     if not cur_path: cur_path = [source]
     res = list()
     q = list(set(find_possible_dests(source)) - set(cur_path))
+    random.shuffle(q)
     for place in q:
         cur_path.append(place)
         path_len = find_link_len(cur_path[-2], cur_path[-1])
@@ -247,26 +233,11 @@ def find_all_routes(source, destination, cur_path=list(), cur_len=0):
     return res
 
 
-def main(filename=""):
-    if filename:
-        node_list, network = load_from_file(filename)
-    else:
-        node_list, network = create_network(nodes=9, fixed_capacity=1)
+def main(networkfilename, packetsfilename):
+    node_list, network = load_network_from_file(networkfilename)
     set_up_network(node_list, network)
-
-    packets_to_send = [  # (iteration#, source, dest, size)
-        Packet(0, node_list[0], node_list[6], 10),
-        Packet(0, node_list[0], node_list[6], 10),
-        Packet(0, node_list[0], node_list[6], 10),
-        Packet(1, node_list[0], node_list[6], 10),
-        Packet(1, node_list[0], node_list[6], 10),
-        Packet(1, node_list[0], node_list[6], 10),
-        Packet(2, node_list[0], node_list[6], 10),
-        Packet(2, node_list[0], node_list[6], 10),
-        Packet(2, node_list[0], node_list[6], 10),
-        Packet(3, node_list[0], node_list[6], 10),
-        Packet(3, node_list[0], node_list[6], 10)
-    ]
+    packets_to_send = load_packets_from_files(packetsfilename, node_list)
+    packets_sent = list()
     all_packets = [p for p in packets_to_send]
     iteration_num = 0
     taken_up = [[]]  # index is turn -> {set(): wait}
@@ -279,17 +250,37 @@ def main(filename=""):
         for packet in packets_to_send[:]:
             if iteration_num == packet.turn:
                 send_packet(packet, taken_up)
+                packets_sent.append(packet)
                 packets_to_send.remove(packet)
         for node in node_list:
-            node.loop_step()
+            node.loop_step(iteration_num)
         for node in node_list:
             node.dont_do_yet = list()
         iteration_num += 1
         if taken_up:
             taken_up.pop(0)
     total_time_waited = sum([p.time_waited for p in all_packets])
-    print("Simulation took "+str(iteration_num)+" iterations. Total time waited: "+str(total_time_waited))
+    slowdown = 0
+    for packet in packets_sent:
+        slowdown += (packet.end_turn - packet.turn)/packet.size
+    slowdown /= len(packets_sent)
+    print("Simulation took "+str(iteration_num)+" iterations. Mean Slowdown: "+str(slowdown)+". Total time waited: "+str(total_time_waited))
+    return iteration_num, slowdown, total_time_waited
 
 
 if __name__ == "__main__":
-    main(filename="/home/conrad/PycharmProjects/CSE4344/network2.csv")
+    with open("results.csv", "w") as f:
+        for name in ['paredo', 'normal', 'uniform']:
+            trials = 10
+            totalits = 0
+            totalslowdown = 0
+            totalwait = 0
+            for x in range(10):
+                iterations, slowdown, wait_time = main(networkfilename="network.csv", packetsfilename=name+".csv")
+                totalits += iterations
+                totalslowdown += slowdown
+                totalwait += wait_time
+            totalits /= trials
+            totalslowdown /= trials
+            totalwait /= trials
+            f.write(name+","+str(totalits)+","+str(totalslowdown)+","+str(totalwait)+"\n")
