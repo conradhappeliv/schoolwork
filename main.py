@@ -190,7 +190,7 @@ def send_packet(packet, taken_up):
     else:
         packet.path = possibles[0][1]
 
-    if PRINT_STEPS: print("Packet from "+str(packet.source)+" to "+str(packet.destination)+" path: "+str(packet.path))
+    if PRINT_STEPS: print("Packet routing from "+str(packet.source)+" to "+str(packet.destination)+" path: "+str(packet.path))
 
     for i in range(len(packet.path)-1):
         if i+2 > len(taken_up):
@@ -247,11 +247,11 @@ def main(networkfilename, packetsfilename):
         if PRINT_STEPS:
             print("ITERATION "+str(iteration_num+1))
         # send packets if it's their turn
-        for packet in packets_to_send[:]:
-            if iteration_num == packet.turn:
-                send_packet(packet, taken_up)
-                packets_sent.append(packet)
-                packets_to_send.remove(packet)
+        thisturnpackets = sorted([packet for packet in packets_to_send if packet.turn == iteration_num], key=lambda x: x.size)
+        for packet in thisturnpackets:
+            send_packet(packet, taken_up)
+            packets_sent.append(packet)
+            packets_to_send.remove(packet)
         for node in node_list:
             node.loop_step(iteration_num)
         for node in node_list:
