@@ -76,6 +76,10 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
+#file folders
+data/
+downloads/
+
 # dotenv
 .env
 
