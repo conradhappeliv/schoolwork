@@ -41,15 +41,16 @@ def find_triangles(y_len, x_len, points):
     return subdiv.getTriangleList()
 
 
-def show_triangles(img, triangles):
-    for t in triangles:
+def show_triangles(img, triangles, window_name="triangles"):
+    for k, t in enumerate(triangles):
         tri1 = [(t[0], t[1]), (t[2], t[3]), (t[4], t[5])]
-        cv2.line(face1, tri1[0], tri1[1], (255, 255, 255))
-        cv2.line(face1, tri1[1], tri1[2], (255, 255, 255))
-        cv2.line(face1, tri1[2], tri1[0], (255, 255, 255))
+        cv2.line(img, tri1[0], tri1[1], (255, 255, 255))
+        cv2.line(img, tri1[1], tri1[2], (255, 255, 255))
+        cv2.line(img, tri1[2], tri1[0], (255, 255, 255))
+        coords = (int((t[0]+t[2]+t[4])/3), int((t[1]+t[3]+t[5])/3))
+        cv2.putText(img, str(k), coords, cv2.FONT_HERSHEY_COMPLEX_SMALL, .7, (1,1,1))
 
-    cv2.imshow("window", img)
-    cv2.waitKey(0)
+    cv2.imshow(window_name, img)
 
 points1 = find_points(face1)
 points2 = find_points(face2)
@@ -70,6 +71,16 @@ points_morphed = [((pt1[0]+pt2[0])/2, (pt1[1]+pt2[1])/2) for pt1, pt2 in zip(poi
 triangles1 = find_triangles(face1.shape[0], face1.shape[1], points1)[4:]
 triangles_morphed = find_triangles(face2.shape[0], face2.shape[1], points_morphed)[4:]
 triangles2 = find_triangles(face2.shape[0], face2.shape[1], points2)[4:]
+
+
+# Uncomment this section to show triangle numbers
+# show_triangles(face1, triangles1, "face1")
+# show_triangles(face2, triangles2, "face2")
+# #cv2.imwrite("./face1.out.png", face1)
+# #cv2.imwrite("./face2.out.png", face2)
+# cv2.waitKey(0)
+# exit(0)
+
 
 # See: https://github.com/spmallick/learnopencv/blob/master/FaceMorph/faceMorph.py
 newimg = np.zeros(face2gray.shape, np.uint8)
@@ -98,10 +109,14 @@ for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
     # SOMETHING IS WRONG WITH THIS SECTION (PROBABLY)
     warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]))
     warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]))
-    plt.subplot(1,2,1)
+    plt.subplot(2,2,1)
     plt.imshow(warped1*mask, cmap='gray')
-    plt.subplot(1, 2, 2)
+    plt.subplot(2, 2, 2)
     plt.imshow(warped2*mask, cmap='gray')
+    plt.subplot(2, 2, 3)
+    plt.imshow(subimg1, cmap='gray')
+    plt.subplot(2, 2, 4)
+    plt.imshow(subimg2, cmap='gray')
     plt.show()
 
     newimg_sq = newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]]
