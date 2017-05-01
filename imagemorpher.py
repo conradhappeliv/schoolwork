@@ -5,18 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-face1 = io.imread('data/face1.jpg') #io reads as RGB
-face2 = io.imread('data/face2.jpg')
-face1gray = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
-face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
-
-
 def find_points(img,predfile = 'data/shape_predictor_68_face_landmarks.dat'):
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(predfile)  # get from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    rects = detector(gray, 0)
-    shape = predictor(gray, rects[0])
+    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    rects = detector(img, 0)
+    shape = predictor(img, rects[0])
 
     points = []
     for pt in shape.parts():
@@ -50,7 +44,7 @@ def find_triangles(shape, points):
     return subdiv.getTriangleList()
 
 
-def refine_triangles(triangles_reference, triangles2, triangles_morphed, points1, points2, points_morphed):
+def refine_triangles(triangles_reference, points1, points2, points_morphed):
     tri1 = [[(int(tri[0]),int(tri[1])),(int(tri[2]),int(tri[3])),(int(tri[4]),int(tri[5]))] for tri in triangles_reference]
     tri2 = []
     trim = []
@@ -75,6 +69,8 @@ def refine_triangles(triangles_reference, triangles2, triangles_morphed, points1
     triangles2 = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in tri2],dtype=np.float32)
     triangles_morphed = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in trim],dtype=np.float32)
 
+    return (triangles1,triangles2,triangles_morphed)
+
 def show_triangles(img, triangles, window_name="triangles"):
     for k, t in enumerate(triangles):
         tri1 = [(t[0], t[1]), (t[2], t[3]), (t[4], t[5])]
@@ -85,6 +81,57 @@ def show_triangles(img, triangles, window_name="triangles"):
         cv2.putText(img, str(k), coords, cv2.FONT_HERSHEY_COMPLEX_SMALL, .7, (1,1,1))
 
     cv2.imshow(window_name, img)
+
+
+def morph(image1,image2,alpha):
+    points1 = find_points(image1)
+    points2 = find_points(image2)
+    points_morphed = weighted_points(points1,points2,alpha)
+
+    triangles1 = find_triangles(face1.shape, points1)
+    (triangles1,triangles2,triangles_morphed) = refine_triangles(triangles1,points1,points2,points_morphed)
+
+    #need to make sure that image2 and image1 the same shape
+    newimg = np.zeros(image2.shape,np.uint8)
+    for tri1,tri2,tri_morph in zip(triangles1,triangles2,triangles_morphed):
+        #3 edges, 2 vertices in each edge
+        tri1 = tri1.reshape(3,2)
+        tri2 = tri2.reshape(3,2)
+        tri_morph = tri_morph.reshape(3,2)
+
+        bb1 = cv2.boundingRect(tri1)
+        bb2 = cv2.boundingRect(tri2)
+        bb_morph = cv2.boundingRect(tri_morph)
+        #rect strucure: {topleftx toplefty width height}
+
+        tri1_offset = np.subtract(tri1,np.repeat([[bb1[0],bb1[1]]],3,axis=0),dtype=np.float32)
+        tri2_offset = np.subtract(tri2,np.repeat([[bb2[0],bb2[1]]],3,axis=0),dtype=np.float32)
+        tri_morph_offset = np.subtract(tri_morph,np.repeat([[bb_morph[0],bb_morph[1]]],3,axis=0),dtype=np.float32)
+
+        trans1 = cv2.getAffineTransform(tri1_offset, tri_morph_offset)
+        trans2 = cv2.getAffineTransform(tri2_offset, tri_morph_offset)
+
+        mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
+        cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1.0)
+
+        subimg1 = face1gray[bb1[1]:bb1[1]+bb1[3], bb1[0]:bb1[0]+bb1[2]]
+        subimg2 = face2gray[bb2[1]:bb2[1]+bb2[3], bb2[0]:bb2[0]+bb2[2]]
+
+        warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]))
+        warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]))
+
+        alpha_blend = (1-alpha)*warped1 + alpha*warped2
+        newimg_sq = newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]]
+        newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]] = newimg_sq + (alpha_blend*mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
+
+    return newimg
+
+
+
+face1 = io.imread('data/face1.jpg') #io reads as RGB
+face2 = io.imread('data/face2.jpg')
+face1gray = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
+face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
 
 points1 = find_points(face1)
 points2 = find_points(face2)
@@ -106,9 +153,7 @@ points_morphed = weighted_points(points1,points2)
 triangles1 = find_triangles(face1.shape, points1)
 # triangles2 = find_triangles(face2.shape, points2)
 # triangles_morphed = find_triangles(face2.shape, points_morphed)
-refine_triangles(triangles1,triangles2,triangles_morphed,points1,points2,points_morphed)
-
-
+(triangles1,triangles2,triangles_morphed) = refine_triangles(triangles1,points1,points2,points_morphed)
 
 
 
@@ -122,48 +167,50 @@ refine_triangles(triangles1,triangles2,triangles_morphed,points1,points2,points_
 # print(triangles1.shape)
 
 # See: https://github.com/spmallick/learnopencv/blob/master/FaceMorph/faceMorph.py
-newimg = np.zeros(face2gray.shape, np.uint8)
-alpha = 0.5
-for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
-    #3 edges, 2 vertices in each edge
-    tri1 = tri1.reshape(3,2)
-    tri2 = tri2.reshape(3,2)
-    tri_morph = tri_morph.reshape(3,2)
+# newimg = np.zeros(face2gray.shape, np.uint8)
+# alpha = 0.5
+# for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
+#     #3 edges, 2 vertices in each edge
+#     tri1 = tri1.reshape(3,2)
+#     tri2 = tri2.reshape(3,2)
+#     tri_morph = tri_morph.reshape(3,2)
+#
+#     bb1 = cv2.boundingRect(tri1)
+#     bb2 = cv2.boundingRect(tri2)
+#     bb_morph = cv2.boundingRect(tri_morph)
+#     #rect strucure: {topleftx toplefty width height}
+#
+#     tri1_offset = np.subtract(tri1,np.repeat([[bb1[0],bb1[1]]],3,axis=0),dtype=np.float32)
+#     tri2_offset = np.subtract(tri2,np.repeat([[bb2[0],bb2[1]]],3,axis=0),dtype=np.float32)
+#     tri_morph_offset = np.subtract(tri_morph,np.repeat([[bb_morph[0],bb_morph[1]]],3,axis=0),dtype=np.float32)
+#
+#     trans1 = cv2.getAffineTransform(tri1_offset, tri_morph_offset)
+#     trans2 = cv2.getAffineTransform(tri2_offset, tri_morph_offset)
+#
+#     mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
+#     cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1.0)
+#
+#     subimg1 = face1gray[bb1[1]:bb1[1]+bb1[3], bb1[0]:bb1[0]+bb1[2]]
+#     subimg2 = face2gray[bb2[1]:bb2[1]+bb2[3], bb2[0]:bb2[0]+bb2[2]]
+#
+#     # SOMETHING IS WRONG WITH THIS SECTION (PROBABLY)
+#     warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]))
+#     warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]))
+#     # plt.subplot(2,2,1)
+#     # plt.imshow(warped1*mask, cmap='gray')
+#     # plt.subplot(2, 2, 2)
+#     # plt.imshow(warped2*mask, cmap='gray')
+#     # plt.subplot(2, 2, 3)
+#     # plt.imshow(subimg1, cmap='gray')
+#     # plt.subplot(2, 2, 4)
+#     # plt.imshow(subimg2, cmap='gray')
+#     # plt.show()
+#
+#     alpha_blend = (1-alpha)*warped1 + alpha*warped2
+#     newimg_sq = newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]]
+#     newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]] = newimg_sq + (alpha_blend*mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
 
-    bb1 = cv2.boundingRect(tri1)
-    bb2 = cv2.boundingRect(tri2)
-    bb_morph = cv2.boundingRect(tri_morph)
-    #rect strucure: {topleftx toplefty width height}
-
-    tri1_offset = np.subtract(tri1,np.repeat([[bb1[0],bb1[1]]],3,axis=0),dtype=np.float32)
-    tri2_offset = np.subtract(tri2,np.repeat([[bb2[0],bb2[1]]],3,axis=0),dtype=np.float32)
-    tri_morph_offset = np.subtract(tri_morph,np.repeat([[bb_morph[0],bb_morph[1]]],3,axis=0),dtype=np.float32)
-
-    trans1 = cv2.getAffineTransform(tri1_offset, tri_morph_offset)
-    trans2 = cv2.getAffineTransform(tri2_offset, tri_morph_offset)
-
-    mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
-    cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1.0)
-
-    subimg1 = face1gray[bb1[1]:bb1[1]+bb1[3], bb1[0]:bb1[0]+bb1[2]]
-    subimg2 = face2gray[bb2[1]:bb2[1]+bb2[3], bb2[0]:bb2[0]+bb2[2]]
-
-    # SOMETHING IS WRONG WITH THIS SECTION (PROBABLY)
-    warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]))
-    warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]))
-    # plt.subplot(2,2,1)
-    # plt.imshow(warped1*mask, cmap='gray')
-    # plt.subplot(2, 2, 2)
-    # plt.imshow(warped2*mask, cmap='gray')
-    # plt.subplot(2, 2, 3)
-    # plt.imshow(subimg1, cmap='gray')
-    # plt.subplot(2, 2, 4)
-    # plt.imshow(subimg2, cmap='gray')
-    # plt.show()
-
-    alpha_blend = (1-alpha)*warped1 + alpha*warped2
-    newimg_sq = newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]]
-    newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]] = newimg_sq + (alpha_blend*mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
+newimg = morph(face1gray,face2gray,1)
 
 plt.figure()
 plt.imshow(newimg, cmap='gray')
