@@ -98,11 +98,18 @@ def show_triangles(img, triangles, window_name="triangles"):
 
 
 def morph(image1, image2, alpha):
+    if (len(image1.shape)==3):
+        face1 = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
+        face2 = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
+    else:
+        face1 = image1
+        face2 = image2
+
     points1 = find_points(image1)
     points2 = find_points(image2)
     points_morphed = weighted_points(points1, points2, alpha)
 
-    triangles1 = find_triangles(face1.shape, points1)[4:]
+    triangles1 = find_triangles(image1.shape, points1)[4:]
     (triangles1, triangles2, triangles_morphed) = refine_triangles(triangles1, points1, points2, points_morphed)
 
     # need to make sure that image2 and image1 the same shape
@@ -128,8 +135,8 @@ def morph(image1, image2, alpha):
         mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
         cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1)
 
-        subimg1 = face1gray[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
-        subimg2 = face2gray[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
+        subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
+        subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
 
         warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
         warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
@@ -142,13 +149,14 @@ def morph(image1, image2, alpha):
     return newimg
 
 
-face1 = io.imread('data/face1.jpg')
-face2 = io.imread('data/face2.jpg')
-face1gray = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
-face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
+if __name__ == "__main__":
+    face1 = io.imread('data/face1.jpg')
+    face2 = io.imread('data/face2.jpg')
+    face1gray = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
+    face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
 
-newimg = morph(face1gray, face2gray, .5)
+    newimg = morph(face1gray, face2gray, .5)
 
-plt.figure()
-plt.imshow(newimg, cmap='gray')
-plt.show()
+    plt.figure()
+    plt.imshow(newimg, cmap='gray')
+    plt.show()
