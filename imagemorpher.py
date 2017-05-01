@@ -135,8 +135,8 @@ for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
     #rect strucure: {topleftx toplefty width height}
 
     tri1_offset = np.subtract(tri1,np.repeat([[bb1[0],bb1[1]]],3,axis=0),dtype=np.float32)
-    tri2_offset = np.subtract(tri1,np.repeat([[bb2[0],bb2[1]]],3,axis=0),dtype=np.float32)
-    tri_morph_offset = np.subtract(tri1,np.repeat([[bb_morph[0],bb_morph[1]]],3,axis=0),dtype=np.float32)
+    tri2_offset = np.subtract(tri2,np.repeat([[bb2[0],bb2[1]]],3,axis=0),dtype=np.float32)
+    tri_morph_offset = np.subtract(tri_morph,np.repeat([[bb_morph[0],bb_morph[1]]],3,axis=0),dtype=np.float32)
 
     trans1 = cv2.getAffineTransform(tri1_offset, tri_morph_offset)
     trans2 = cv2.getAffineTransform(tri2_offset, tri_morph_offset)
@@ -150,15 +150,15 @@ for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
     # SOMETHING IS WRONG WITH THIS SECTION (PROBABLY)
     warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]))
     warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]))
-    plt.subplot(2,2,1)
-    plt.imshow(warped1*mask, cmap='gray')
-    plt.subplot(2, 2, 2)
-    plt.imshow(warped2*mask, cmap='gray')
-    plt.subplot(2, 2, 3)
-    plt.imshow(subimg1, cmap='gray')
-    plt.subplot(2, 2, 4)
-    plt.imshow(subimg2, cmap='gray')
-    plt.show()
+    # plt.subplot(2,2,1)
+    # plt.imshow(warped1*mask, cmap='gray')
+    # plt.subplot(2, 2, 2)
+    # plt.imshow(warped2*mask, cmap='gray')
+    # plt.subplot(2, 2, 3)
+    # plt.imshow(subimg1, cmap='gray')
+    # plt.subplot(2, 2, 4)
+    # plt.imshow(subimg2, cmap='gray')
+    # plt.show()
 
     alpha_blend = (1-alpha)*warped1 + alpha*warped2
     newimg_sq = newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]]
