@@ -126,7 +126,7 @@ def morph(image1, image2, alpha):
         trans2 = cv2.getAffineTransform(tri2_offset, tri_morph_offset)
 
         mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
-        cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1.0)
+        cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1)
 
         subimg1 = face1gray[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
         subimg2 = face2gray[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
@@ -136,6 +136,7 @@ def morph(image1, image2, alpha):
 
         alpha_blend = (1 - alpha) * warped1 + alpha * warped2
         newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]]
+        mask[newimg_sq != 0] = 0
         newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
 
     return newimg
