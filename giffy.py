@@ -6,9 +6,6 @@ from skimage import io
 import matplotlib.pyplot as plt
 
 def make_gif(images,filename):
-    # with imageio.get_writer(filename,mode='I') as writer:
-        # for image in images:
-            # writer.append_data(image)
     imageio.mimsave(filename,images)
 
 if __name__ == "__main__":
@@ -23,10 +20,10 @@ if __name__ == "__main__":
     images = []
     for alpha in np.linspace(0,1,num=60):
         images.append(imagemorpher.morph(face1gray,face2gray,alpha))
-    # for delay in np.linspace(0,1,num=10):
-    #     images.append(face2gray)
-    for alpha in np.linspace(1,0,num=60):
-        images.append(imagemorpher.morph(face1gray,face2gray,alpha))
-    # for delay in np.linspace(0,1,num=10):
-        # images.append(face1gray)
+    for delay in np.linspace(0,1,num=10):
+         images.append(face2gray)
+    for i in reversed(images):
+        images.append(i)
+    for delay in np.linspace(0,1,num=10):
+        images.append(face1gray)
     make_gif(images,"data/test.gif")
