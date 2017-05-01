@@ -50,6 +50,31 @@ def find_triangles(shape, points):
     return subdiv.getTriangleList()
 
 
+def refine_triangles(triangles_reference, triangles2, triangles_morphed, points1, points2, points_morphed):
+    tri1 = [[(int(tri[0]),int(tri[1])),(int(tri[2]),int(tri[3])),(int(tri[4]),int(tri[5]))] for tri in triangles_reference]
+    tri2 = []
+    trim = []
+    tri1new = []
+    for tri in tri1:
+        ind = 1
+        try:
+            pt1 = points1.index(tri[0])
+            pt2 = points1.index(tri[1])
+            pt3 = points1.index(tri[2])
+            ind = 1
+        except ValueError:
+            #find triangles sometimes uses points way beyond edge of picture
+            ind = -1
+        if ind != -1:
+            #append legit triangles, might not need to find triangles for 2 and morph
+            tri1new.append((points1[pt1],points1[pt2],points1[pt3]))
+            tri2.append((points2[pt1],points2[pt2],points2[pt3]))
+            trim.append((points_morphed[pt1],points_morphed[pt2],points_morphed[pt3]))
+
+    triangles1 = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in tri1new],dtype=np.float32)
+    triangles2 = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in tri2],dtype=np.float32)
+    triangles_morphed = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in trim],dtype=np.float32)
+
 def show_triangles(img, triangles, window_name="triangles"):
     for k, t in enumerate(triangles):
         tri1 = [(t[0], t[1]), (t[2], t[3]), (t[4], t[5])]
@@ -79,37 +104,13 @@ points_morphed = weighted_points(points1,points2)
 # plt.show()
 
 triangles1 = find_triangles(face1.shape, points1)
-triangles2 = find_triangles(face2.shape, points2)
-triangles_morphed = find_triangles(face2.shape, points_morphed)
+# triangles2 = find_triangles(face2.shape, points2)
+# triangles_morphed = find_triangles(face2.shape, points_morphed)
+refine_triangles(triangles1,triangles2,triangles_morphed,points1,points2,points_morphed)
 
 
 
-tri1 = [[(int(tri[0]),int(tri[1])),(int(tri[2]),int(tri[3])),(int(tri[4]),int(tri[5]))] for tri in triangles1]
-tri2 = []
-trim = []
-tri1new = []
-for tri in tri1:
-    ind = 1
-    try:
-        pt1 = points1.index(tri[0])
-        pt2 = points1.index(tri[1])
-        pt3 = points1.index(tri[2])
-        ind = 1
-    except ValueError:
-        #find triangles sometimes uses points way beyond edge of picture
-        ind = -1
-    if ind != -1:
-        #append legit triangles, might not need to find triangles for 2 and morph
-        tri1new.append((points1[pt1],points1[pt2],points1[pt3]))
-        tri2.append((points2[pt1],points2[pt2],points2[pt3]))
-        trim.append((points_morphed[pt1],points_morphed[pt2],points_morphed[pt3]))
 
-
-
-#comment this section to use the original morphing triangles
-triangles1 = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in tri1new],dtype=np.float32)
-triangles2 = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in tri2],dtype=np.float32)
-triangles_morphed = np.array([[x[0][0],x[0][1],x[1][0],x[1][1],x[2][0],x[2][1]] for x in trim],dtype=np.float32)
 
 # Uncomment this section to show triangle numbers
 # show_triangles(face1, triangles1, "face1")
