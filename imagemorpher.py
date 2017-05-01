@@ -213,7 +213,7 @@ triangles1 = find_triangles(face1.shape, points1)
 #     newimg_sq = newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]]
 #     newimg[bb_morph[1]:bb_morph[1]+bb_morph[3], bb_morph[0]:bb_morph[0]+bb_morph[2]] = newimg_sq + (alpha_blend*mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
 
-newimg = morph(face1gray,face2gray,0.5)
+newimg = morph(face1gray,face2gray,1)
 
 plt.figure()
 plt.imshow(newimg, cmap='gray')
