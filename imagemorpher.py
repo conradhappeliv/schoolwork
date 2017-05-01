@@ -8,9 +8,12 @@ import numpy as np
 def find_points(img,predfile = 'data/shape_predictor_68_face_landmarks.dat'):
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(predfile)  # get from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
-    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    rects = detector(img, 0)
-    shape = predictor(img, rects[0])
+    if(len(img.shape)==3):
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = img
+    rects = detector(gray, 0)
+    shape = predictor(gray, rects[0])
 
     points = []
     for pt in shape.parts():
