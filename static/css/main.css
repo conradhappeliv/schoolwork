@@ -3,14 +3,25 @@
     padding: 0;
     text-align:center;
     color:white;
+    font-family: 'Roboto', sans-serif;
 }
 
 body {
     background-color:#222222;
 }
 
-h1 {
+h1, h2 {
     text-align:center;
+    font-family: 'Roboto', sans-serif;
+}
+
+p {
+    font-family: 'Roboto', sans-serif;
+}
+
+.about p {
+    margin:10px;
+    text-align:left;
 }
 
 input[type=file] {
@@ -38,4 +49,8 @@ input[type=submit] {
     border:0;
     color:black;
     margin:20px;
+}
+
+.about {
+    margin-top: 40px;
 }
