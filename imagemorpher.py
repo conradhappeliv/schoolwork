@@ -96,7 +96,7 @@ def show_triangles(img, triangles, window_name="triangles"):
 
     cv2.imshow(window_name, img)
 
-baseline = [480, 320]
+baseline = [380, 380]
 def shrink(image1):
     origsize = image1.shape[0:2]
     scale = np.divide(baseline,origsize)
@@ -170,6 +170,7 @@ def morph(image1, image2, alpha, rgb=True):
                 alpha_blend[:, :, i] *= mask
             newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + alpha_blend[:newimg_sq.shape[0], :newimg_sq.shape[1]]
 
+    newimg = shrink(newimg)
     return newimg
 
 
