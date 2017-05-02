@@ -99,6 +99,26 @@ def show_triangles(img, triangles, window_name="triangles"):
     cv2.imshow(window_name, img)
 
 
+def draw_triangles(img,triangles,filename):
+    output = img.copy()
+    for k, t in enumerate(triangles):
+        tri1 = [(t[0], t[1]), (t[2], t[3]), (t[4], t[5])]
+        cv2.line(output, tri1[0], tri1[1], (255, 255, 255))
+        cv2.line(output, tri1[1], tri1[2], (255, 255, 255))
+        cv2.line(output, tri1[2], tri1[0], (255, 255, 255))
+        coords = (int((t[0] + t[2] + t[4]) / 3), int((t[1] + t[3] + t[5]) / 3))
+        cv2.putText(output, str(k), coords, cv2.FONT_HERSHEY_COMPLEX_SMALL, .7, (1, 1, 1))
+
+    cv2.imwrite(filename,output)
+
+def draw_points(img,points,filename):
+    output = img.copy()
+    for pt in points:
+        cv2.circle(output,pt,1)
+
+    cv2.imwrite(filename,output)
+
+
 def shrink(image1, numpixels=122500):
     origpixels = image1.shape[0] * image1.shape[1]
     ratio = image1.shape[0] / image1.shape[1]
