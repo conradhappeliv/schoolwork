@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from skimage import io
 
+from math import sqrt
+
 detector = dlib.get_frontal_face_detector()
 # get from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
 predictor = dlib.shape_predictor('data/shape_predictor_68_face_landmarks.dat')
@@ -96,24 +98,25 @@ def show_triangles(img, triangles, window_name="triangles"):
 
     cv2.imshow(window_name, img)
 
-baseline = [380, 380]
-def shrink(image1):
-    origsize = image1.shape[0:2]
-    scale = np.divide(baseline,origsize)
-    return cv2.resize(image1,(0,0),fx=scale[1],fy=scale[0])
+
+def shrink(image1, numpixels=122500):
+    origpixels = image1.shape[0] * image1.shape[1]
+    ratio = image1.shape[0] / image1.shape[1]
+    new_w = sqrt(numpixels/ratio)
+    new_h = ratio*new_w
+    if origpixels > numpixels:
+        return cv2.resize(image1, (int(new_w), int(new_h)), interpolation=cv2.INTER_AREA)
+    else:
+        return image1
+
 
 def morph(image1, image2, alpha, rgb=True):
-    # image1 = shrink(image1)
-    # print(image1.shape)
-    # image2 = shrink(image2)
-    # print(image2.shape)
-    # plt.imshow(image1)
     if not rgb:
         image1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
         image2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
 
-    face1 = image1
-    face2 = image2
+    image1 = shrink(image1)
+    image2 = shrink(image2)
 
     points1 = find_points(image1)
     points2 = find_points(image2)
@@ -123,7 +126,7 @@ def morph(image1, image2, alpha, rgb=True):
     (triangles1, triangles2, triangles_morphed) = refine_triangles(triangles1, points1, points2, points_morphed)
 
     # need to make sure that image2 and image1 the same shape
-    newimg = np.zeros(image2.shape, np.uint8)
+    newimg = np.zeros((max(image1.shape[0], image2.shape[0]), max(image1.shape[1], image2.shape[1])), np.uint8)
     for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
         # 3 edges, 2 vertices in each edge
         tri1 = tri1.reshape(3, 2)
@@ -146,8 +149,8 @@ def morph(image1, image2, alpha, rgb=True):
         cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1)
 
         if not rgb:
-            subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
-            subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
+            subimg1 = image1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
+            subimg2 = image2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
 
             warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
             warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
@@ -157,8 +160,8 @@ def morph(image1, image2, alpha, rgb=True):
             mask[newimg_sq != 0] = 0
             newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
         else:
-            subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2], :]
-            subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2], :]
+            subimg1 = image1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2], :]
+            subimg2 = image2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2], :]
 
             warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
             warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
@@ -170,7 +173,6 @@ def morph(image1, image2, alpha, rgb=True):
                 alpha_blend[:, :, i] *= mask
             newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + alpha_blend[:newimg_sq.shape[0], :newimg_sq.shape[1]]
 
-    newimg = shrink(newimg)
     return newimg
 
 
