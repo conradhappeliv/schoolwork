@@ -99,11 +99,12 @@ def show_triangles(img, triangles, window_name="triangles"):
 
 def morph(image1, image2, alpha):
     if (len(image1.shape)==3):
-        face1 = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
-        face2 = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
+        rgb=True
     else:
-        face1 = image1
-        face2 = image2
+        rgb=False
+
+    face1 = image1
+    face2 = image2
 
     points1 = find_points(image1)
     points2 = find_points(image2)
@@ -135,16 +136,30 @@ def morph(image1, image2, alpha):
         mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
         cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1)
 
-        subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
-        subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
+        if rgb==False:
+            subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
+            subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
 
-        warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
-        warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+            warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+            warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
 
-        alpha_blend = (1 - alpha) * warped1 + alpha * warped2
-        newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]]
-        mask[newimg_sq != 0] = 0
-        newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
+            alpha_blend = (1 - alpha) * warped1 + alpha * warped2
+            newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]]
+            mask[newimg_sq != 0] = 0
+            newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
+        else:
+            subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2],:]
+            subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2],:]
+
+            warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+            warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+
+            alpha_blend = (1 - alpha) * warped1 + alpha * warped2
+            newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2],:]
+            mask = np.dstack([mask,mask,mask]) #for rgb channels
+            mask[newimg_sq != 0] = 0
+            newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
+
 
     return newimg
 
@@ -155,8 +170,10 @@ if __name__ == "__main__":
     face1gray = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
     face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
 
-    newimg = morph(face1gray, face2gray, .5)
+    newimg = morph(face1, face2, .5)
 
     plt.figure()
     plt.imshow(newimg, cmap='gray')
     plt.show()
+
+    np.repeat([2],3)
