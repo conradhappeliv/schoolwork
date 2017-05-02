@@ -5,25 +5,38 @@ import imagemorpher
 from skimage import io
 import matplotlib.pyplot as plt
 
-def make_gif(images,filename):
-    imageio.mimsave(filename,images)
+
+def save_gif(images, filename, reverse=True):
+    dly_amt = .1
+    durations = []
+    durations.append(1)
+    durations += [dly_amt]*(len(images)-2)
+    durations.append(1)
+    if reverse:
+        for img in reversed(images[1:-1]):
+            images.append(img)
+            durations.append(dly_amt)
+    imageio.mimsave(filename,images, subrectangles=True, palettesize=32, duration=durations, loop=0)
+
+
+def make_gif(image1, image2):
+    image1gray = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
+    image2gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
+
+    plt.imshow(imagemorpher.morph(image1gray, image2gray, 1))
+
+    np.linspace(1, 0)
+    images = []
+    for alpha in np.linspace(0, 1, num=8):
+        images.append(imagemorpher.morph(image1gray, image2gray, alpha))
+
+    return images
+
 
 if __name__ == "__main__":
     face1 = io.imread('data/face1.jpg')
-    face2 = io.imread('data/face2.jpg')
-    face1gray = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
-    face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
+    face2 = io.imread('data/face3.jpg')
 
-    plt.imshow(imagemorpher.morph(face1gray,face2gray,1))
+    images = make_gif(face1, face2)
 
-    np.linspace(1,0)
-    images = []
-    for alpha in np.linspace(0,1,num=60):
-        images.append(imagemorpher.morph(face1gray,face2gray,alpha))
-    for delay in np.linspace(0,1,num=10):
-         images.append(face2gray)
-    for i in reversed(images):
-        images.append(i)
-    for delay in np.linspace(0,1,num=10):
-        images.append(face1gray)
-    make_gif(images,"data/test.gif")
+    save_gif(images, "data/test.gif")
