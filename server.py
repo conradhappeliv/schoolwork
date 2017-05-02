@@ -28,11 +28,15 @@ class ImageMorpher(object):
         uuid = uuid4().hex
         save_gif(imgs, 'static/generated/'+uuid+'.gif')
 
-        raise cherrypy.HTTPRedirect("/static/generated/"+uuid+".gif")
+        raise cherrypy.HTTPRedirect("static/generated/"+uuid+".gif")
 
     upload.exposed = True
 
 if __name__ == '__main__':
+    cherrypy.config.update({
+	'server.socket_host': '0.0.0.0',
+	'server.socket_port': 9722,
+    })
     conf = {
         '/': {
             'tools.staticdir.on': True,
