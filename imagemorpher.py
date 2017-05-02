@@ -129,6 +129,9 @@ def shrink(image1, numpixels=122500):
     else:
         return image1
 
+def shrink_to_height(image, height):
+    new_w = height/image.shape[1]*image.shape[0]
+    return cv2.resize(image, (int(new_w), int(height)), interpolation=cv2.INTER_AREA)
 
 def morph(image1, image2, alpha, rgb=True):
     if not rgb:
@@ -137,6 +140,9 @@ def morph(image1, image2, alpha, rgb=True):
 
     image1 = shrink(image1)
     image2 = shrink(image2)
+
+    # image1 = shrink_to_height(image1, min(image1.shape[1], image2.shape[1]))
+    # image2 = shrink_to_height(image2, min(image1.shape[1], image2.shape[1]))
 
     points1 = find_points(image1)
     points2 = find_points(image2)
