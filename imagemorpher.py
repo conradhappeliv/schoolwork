@@ -99,13 +99,14 @@ def show_triangles(img, triangles, window_name="triangles"):
 
 def morph(image1, image2, alpha):
     if (len(image1.shape)==3):
-        rgb=True
+        rgb=False
+        image1 = cv2.cvtColor(image1,cv2.COLOR_RGB2GRAY)
+        image2 = cv2.cvtColor(image2,cv2.COLOR_RGB2GRAY)
     else:
         rgb=False
 
     face1 = image1
     face2 = image2
-
     points1 = find_points(image1)
     points2 = find_points(image2)
     points_morphed = weighted_points(points1, points2, alpha)
