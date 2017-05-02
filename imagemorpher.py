@@ -114,7 +114,7 @@ def draw_triangles(img,triangles,filename):
 def draw_points(img,points,filename):
     output = img.copy()
     for pt in points:
-        cv2.circle(output,pt,1)
+        cv2.circle(output,(pt[0],pt[1]),1,[255,255,255])
 
     cv2.imwrite(filename,output)
 
