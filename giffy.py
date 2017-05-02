@@ -22,20 +22,20 @@ def make_gif(image1, image2):
     image1 = np.array(image1)
     image2 = np.array(image2)
 
-    image1gray = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
-    image2gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
+    # image1gray = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
+    # image2gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
 
     np.linspace(1, 0)
     images = []
     for alpha in np.linspace(0, 1, num=8):
-        images.append(imagemorpher.morph(image1gray, image2gray, alpha))
+        images.append(imagemorpher.morph(image1, image2, alpha))
 
     return images
 
 
 if __name__ == "__main__":
     face1 = io.imread('data/face1.jpg')
-    face2 = io.imread('data/face3.jpg')
+    face2 = io.imread('data/face2.jpg')
 
     images = make_gif(face1, face2)
 
