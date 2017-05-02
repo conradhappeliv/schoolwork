@@ -27,7 +27,7 @@ def make_gif(image1, image2):
     np.linspace(1, 0)
     images = []
     for alpha in np.linspace(0, 1, num=8):
-        images.append(imagemorpher.morph(image1, image2, alpha))
+        images.append(imagemorpher.morph(image1, image2, alpha, rgb=False))
 
     return images
 

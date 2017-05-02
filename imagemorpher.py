@@ -97,8 +97,10 @@ def show_triangles(img, triangles, window_name="triangles"):
     cv2.imshow(window_name, img)
 
 
-def morph(image1, image2, alpha):
-    rgb = len(image1.shape) == 3
+def morph(image1, image2, alpha, rgb=True):
+    if not rgb:
+        image1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
+        image2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
 
     face1 = image1
     face2 = image2
