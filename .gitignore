@@ -79,6 +79,7 @@ celerybeat-schedule
 #file folders
 data/
 downloads/
+static/generated
 
 # dotenv
 .env
