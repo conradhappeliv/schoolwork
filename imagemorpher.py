@@ -96,8 +96,18 @@ def show_triangles(img, triangles, window_name="triangles"):
 
     cv2.imshow(window_name, img)
 
+baseline = [480, 320]
+def shrink(image1):
+    origsize = image1.shape[0:2]
+    scale = np.divide(baseline,origsize)
+    return cv2.resize(image1,(0,0),fx=scale[1],fy=scale[0])
 
 def morph(image1, image2, alpha, rgb=True):
+    # image1 = shrink(image1)
+    # print(image1.shape)
+    # image2 = shrink(image2)
+    # print(image2.shape)
+    # plt.imshow(image1)
     if not rgb:
         image1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
         image2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
@@ -172,7 +182,5 @@ if __name__ == "__main__":
     newimg = morph(face1, face2, .5)
 
     plt.figure()
-    plt.imshow(newimg, cmap='gray')
+    plt.imshow(newimg)
     plt.show()
-
-    np.repeat([2], 3)
