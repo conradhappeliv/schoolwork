@@ -1,5 +1,4 @@
 import numpy as np
-import cv2
 import imageio
 import imagemorpher
 from skimage import io

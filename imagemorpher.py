@@ -98,10 +98,7 @@ def show_triangles(img, triangles, window_name="triangles"):
 
 
 def morph(image1, image2, alpha):
-    if (len(image1.shape)==3):
-        rgb=True
-    else:
-        rgb=False
+    rgb = len(image1.shape) == 3
 
     face1 = image1
     face2 = image2
@@ -136,7 +133,7 @@ def morph(image1, image2, alpha):
         mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
         cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1)
 
-        if rgb==False:
+        if not rgb:
             subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
             subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
 
@@ -148,18 +145,18 @@ def morph(image1, image2, alpha):
             mask[newimg_sq != 0] = 0
             newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
         else:
-            subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2],:]
-            subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2],:]
+            subimg1 = face1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2], :]
+            subimg2 = face2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2], :]
 
             warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
             warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
 
             alpha_blend = (1 - alpha) * warped1 + alpha * warped2
-            newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2],:]
-            mask = np.dstack([mask,mask,mask]) #for rgb channels
-            mask[newimg_sq != 0] = 0
-            newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
-
+            newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2], :]
+            mask[newimg_sq[:, :, 0] != 0] = 0
+            for i in range(3):
+                alpha_blend[:, :, i] *= mask
+            newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + alpha_blend[:newimg_sq.shape[0], :newimg_sq.shape[1]]
 
     return newimg
 
@@ -176,4 +173,4 @@ if __name__ == "__main__":
     plt.imshow(newimg, cmap='gray')
     plt.show()
 
-    np.repeat([2],3)
+    np.repeat([2], 3)
