@@ -1,20 +1,14 @@
 import os
 import cherrypy
+from io import BytesIO
+from PIL import Image
+from uuid import uuid4
+
+from giffy import make_gif, save_gif
 
 
 class ImageMorpher(object):
     def upload(self, file_1, file_2):
-        out = """<html>
-        <body>
-            myFile1 length: %s<br />
-            myFile1 filename: %s<br />
-            myFile1 mime-type: %s <br />
-            myFile2 length: %s<br />
-            myFile2 filename: %s<br />
-            myFile2 mime-type: %s
-        </body>
-        </html>"""
-
         def readall(file_obj):
             img = bytes()
             while True:
@@ -27,7 +21,15 @@ class ImageMorpher(object):
         img1 = readall(file_1)
         img2 = readall(file_2)
 
-        return out % (len(img1), file_1.filename, file_1.content_type, len(img2), file_2.filename, file_2.content_type)
+        img1 = Image.open(BytesIO(img1))
+        img2 = Image.open(BytesIO(img2))
+
+        imgs = make_gif(img1, img2)
+        uuid = uuid4().hex
+        save_gif(imgs, 'static/generated/'+uuid+'.gif')
+
+        raise cherrypy.HTTPRedirect("/static/generated/"+uuid+".gif")
+
     upload.exposed = True
 
 if __name__ == '__main__':

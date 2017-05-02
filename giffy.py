@@ -3,7 +3,6 @@ import cv2
 import imageio
 import imagemorpher
 from skimage import io
-import matplotlib.pyplot as plt
 
 
 def save_gif(images, filename, reverse=True):
@@ -16,14 +15,15 @@ def save_gif(images, filename, reverse=True):
         for img in reversed(images[1:-1]):
             images.append(img)
             durations.append(dly_amt)
-    imageio.mimsave(filename,images, subrectangles=True, palettesize=32, duration=durations, loop=0)
+    imageio.mimsave(filename, images, subrectangles=True, palettesize=32, duration=durations, loop=0)
 
 
 def make_gif(image1, image2):
+    image1 = np.array(image1)
+    image2 = np.array(image2)
+
     image1gray = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
     image2gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-
-    plt.imshow(imagemorpher.morph(image1gray, image2gray, 1))
 
     np.linspace(1, 0)
     images = []
