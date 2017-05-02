@@ -114,7 +114,7 @@ def draw_triangles(img,triangles,filename):
 def draw_points(img,points,filename):
     output = img.copy()
     for pt in points:
-        cv2.circle(output,(pt[0],pt[1]),1,[255,255,255])
+        cv2.circle(output,(int(pt[0]),int(pt[1])),1,[255,255,255])
 
     cv2.imwrite(filename,output)
 
@@ -152,7 +152,11 @@ def morph(image1, image2, alpha, rgb=True):
     (triangles1, triangles2, triangles_morphed) = refine_triangles(triangles1, points1, points2, points_morphed)
 
     # need to make sure that image2 and image1 the same shape
-    newimg = np.zeros((max(image1.shape[0], image2.shape[0]), max(image1.shape[1], image2.shape[1])), np.uint8)
+    if not rgb:
+        newimg = np.zeros((max(image1.shape[0], image2.shape[0]), max(image1.shape[1], image2.shape[1])), np.uint8)
+    else:
+        newimg = np.zeros((max(image1.shape[0], image2.shape[0]), max(image1.shape[1], image2.shape[1]),3), np.uint8)
+    print(rgb)
     for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
         # 3 edges, 2 vertices in each edge
         tri1 = tri1.reshape(3, 2)
@@ -209,6 +213,10 @@ if __name__ == "__main__":
     face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
 
     newimg = morph(face1, face2, .5)
+    points = find_points(face1)
+    triangles = find_triangles(face1.shape,points)
+    draw_triangles(face1,triangles,'data/triangles.png')
+    draw_points(face1,points,'data/points.png')
 
     plt.figure()
     plt.imshow(newimg)
