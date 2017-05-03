@@ -1,0 +1,56 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-align:center;
+    color:white;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color:#222222;
+}
+
+h1, h2 {
+    text-align:center;
+    font-family: 'Roboto', sans-serif;
+}
+
+p {
+    font-family: 'Roboto', sans-serif;
+}
+
+.about p {
+    margin:10px;
+    text-align:left;
+}
+
+input[type=file] {
+    display:none
+}
+
+.file_upload {
+    display:block;
+    padding: 6px 12px;
+    background-color: #aaffaa;
+    margin: 20px auto;
+    color: black;
+    width: 150px;
+    cursor: pointer;
+}
+
+.file_upload p {
+    color:black;
+}
+
+input[type=submit] {
+    background-color: #aaaaff;
+    padding:10px;
+    border-radius:10px;
+    border:0;
+    color:black;
+    margin:20px;
+}
+
+.about {
+    margin-top: 40px;
+}

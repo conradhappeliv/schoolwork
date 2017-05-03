@@ -1,0 +1,223 @@
+import cv2
+import dlib
+import matplotlib.pyplot as plt
+import numpy as np
+from skimage import io
+
+from math import sqrt
+
+detector = dlib.get_frontal_face_detector()
+# get from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
+predictor = dlib.shape_predictor('data/shape_predictor_68_face_landmarks.dat')
+
+
+def find_points(img):
+    if len(img.shape) == 3:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = img
+    rects = detector(img, 0)
+    shape = predictor(img, rects[0])
+
+    points = []
+    for pt in shape.parts():
+        points.append((pt.x, pt.y))
+
+    # Edge points:
+    points.append((0, 0))
+    points.append((img.shape[1] / 2, 0))
+    points.append((img.shape[1] - 1, 0))
+    points.append((0, img.shape[0] / 2))
+    points.append((0, img.shape[0] - 1))
+    points.append((img.shape[1] - 1, img.shape[0] / 2))
+    points.append((img.shape[1] / 2, img.shape[0] - 1))
+    points.append((img.shape[1] - 1, img.shape[0] - 1))
+    return points
+
+
+def weighted_points(points1, points2, alpha=0.5):
+    pts = []
+    for pt1, pt2 in zip(points1, points2):
+        x = (1 - alpha) * pt1[0] + alpha * pt2[0]
+        y = (1 - alpha) * pt1[1] + alpha * pt2[1]
+        pts.append((x, y))
+    return pts
+
+
+def find_triangles(shape, points):
+    # topleftx toplefty width height
+    rect = (0, 0, shape[1], shape[0])
+    subdiv = cv2.Subdiv2D(rect)
+    [subdiv.insert(pt) for pt in points]
+    return subdiv.getTriangleList()
+
+
+def refine_triangles(triangles_reference, points1, points2, points_morphed):
+    def find_point(pointlist, point):
+        try:
+            return pointlist.index(point)
+        except ValueError:
+            return -1
+
+    tri1 = [[(int(tri[0]), int(tri[1])), (int(tri[2]), int(tri[3])), (int(tri[4]), int(tri[5]))] for tri in
+            triangles_reference]
+    tri2 = []
+    trim = []
+    tri1new = []
+    for tri in tri1:
+        pt1 = find_point(points1, tri[0])
+        pt2 = find_point(points1, tri[1])
+        pt3 = find_point(points1, tri[2])
+        # append legit triangles, might not need to find triangles for 2 and morph
+        tri1new.append((points1[pt1] if pt1 != -1 else tri[0],
+                        points1[pt2] if pt2 != -1 else tri[1],
+                        points1[pt3] if pt3 != -1 else tri[2]))
+        tri2.append((points2[pt1] if pt1 != -1 else tri[0],
+                     points2[pt2] if pt2 != -1 else tri[1],
+                     points2[pt3] if pt3 != -1 else tri[2]))
+        trim.append((points_morphed[pt1] if pt1 != -1 else tri[0],
+                     points_morphed[pt2] if pt2 != -1 else tri[1],
+                     points_morphed[pt3] if pt3 != -1 else tri[2]))
+
+    triangles1 = np.array([[x[0][0], x[0][1], x[1][0], x[1][1], x[2][0], x[2][1]] for x in tri1new], dtype=np.float32)
+    triangles2 = np.array([[x[0][0], x[0][1], x[1][0], x[1][1], x[2][0], x[2][1]] for x in tri2], dtype=np.float32)
+    triangles_morphed = np.array([[x[0][0], x[0][1], x[1][0], x[1][1], x[2][0], x[2][1]] for x in trim],
+                                 dtype=np.float32)
+
+    return triangles1, triangles2, triangles_morphed
+
+
+def show_triangles(img, triangles, window_name="triangles"):
+    for k, t in enumerate(triangles):
+        tri1 = [(t[0], t[1]), (t[2], t[3]), (t[4], t[5])]
+        cv2.line(img, tri1[0], tri1[1], (255, 255, 255))
+        cv2.line(img, tri1[1], tri1[2], (255, 255, 255))
+        cv2.line(img, tri1[2], tri1[0], (255, 255, 255))
+        coords = (int((t[0] + t[2] + t[4]) / 3), int((t[1] + t[3] + t[5]) / 3))
+        cv2.putText(img, str(k), coords, cv2.FONT_HERSHEY_COMPLEX_SMALL, .7, (1, 1, 1))
+
+    cv2.imshow(window_name, img)
+
+
+def draw_triangles(img,triangles,filename):
+    output = img.copy()
+    for k, t in enumerate(triangles):
+        tri1 = [(t[0], t[1]), (t[2], t[3]), (t[4], t[5])]
+        cv2.line(output, tri1[0], tri1[1], (255, 255, 255))
+        cv2.line(output, tri1[1], tri1[2], (255, 255, 255))
+        cv2.line(output, tri1[2], tri1[0], (255, 255, 255))
+        coords = (int((t[0] + t[2] + t[4]) / 3), int((t[1] + t[3] + t[5]) / 3))
+        cv2.putText(output, str(k), coords, cv2.FONT_HERSHEY_COMPLEX_SMALL, .7, (1, 1, 1))
+
+    cv2.imwrite(filename,output)
+
+def draw_points(img,points,filename):
+    output = img.copy()
+    for pt in points:
+        cv2.circle(output,(int(pt[0]),int(pt[1])),1,[255,255,255])
+
+    cv2.imwrite(filename,output)
+
+
+def shrink(image1, numpixels=122500):
+    origpixels = image1.shape[0] * image1.shape[1]
+    ratio = image1.shape[0] / image1.shape[1]
+    new_w = sqrt(numpixels/ratio)
+    new_h = ratio*new_w
+    if origpixels > numpixels:
+        return cv2.resize(image1, (int(new_w), int(new_h)), interpolation=cv2.INTER_AREA)
+    else:
+        return image1
+
+def shrink_to_height(image, height):
+    new_w = height/image.shape[1]*image.shape[0]
+    return cv2.resize(image, (int(new_w), int(height)), interpolation=cv2.INTER_AREA)
+
+def morph(image1, image2, alpha, rgb=True):
+    if not rgb:
+        image1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
+        image2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
+
+    image1 = shrink(image1)
+    image2 = shrink(image2)
+
+    # image1 = shrink_to_height(image1, min(image1.shape[1], image2.shape[1]))
+    # image2 = shrink_to_height(image2, min(image1.shape[1], image2.shape[1]))
+
+    points1 = find_points(image1)
+    points2 = find_points(image2)
+    points_morphed = weighted_points(points1, points2, alpha)
+
+    triangles1 = find_triangles(image1.shape, points1)[4:]
+    (triangles1, triangles2, triangles_morphed) = refine_triangles(triangles1, points1, points2, points_morphed)
+
+    # need to make sure that image2 and image1 the same shape
+    if not rgb:
+        newimg = np.zeros((max(image1.shape[0], image2.shape[0]), max(image1.shape[1], image2.shape[1])), np.uint8)
+    else:
+        newimg = np.zeros((max(image1.shape[0], image2.shape[0]), max(image1.shape[1], image2.shape[1]),3), np.uint8)
+    print(rgb)
+    for tri1, tri2, tri_morph in zip(triangles1, triangles2, triangles_morphed):
+        # 3 edges, 2 vertices in each edge
+        tri1 = tri1.reshape(3, 2)
+        tri2 = tri2.reshape(3, 2)
+        tri_morph = tri_morph.reshape(3, 2)
+
+        bb1 = cv2.boundingRect(tri1)
+        bb2 = cv2.boundingRect(tri2)
+        bb_morph = cv2.boundingRect(tri_morph)
+        # rect strucure: {topleftx toplefty width height}
+
+        tri1_offset = np.subtract(tri1, np.repeat([[bb1[0], bb1[1]]], 3, axis=0), dtype=np.float32)
+        tri2_offset = np.subtract(tri2, np.repeat([[bb2[0], bb2[1]]], 3, axis=0), dtype=np.float32)
+        tri_morph_offset = np.subtract(tri_morph, np.repeat([[bb_morph[0], bb_morph[1]]], 3, axis=0), dtype=np.float32)
+
+        trans1 = cv2.getAffineTransform(tri1_offset, tri_morph_offset)
+        trans2 = cv2.getAffineTransform(tri2_offset, tri_morph_offset)
+
+        mask = np.zeros((bb_morph[3], bb_morph[2]), np.float32)
+        cv2.fillConvexPoly(mask, np.int32(tri_morph_offset), 1)
+
+        if not rgb:
+            subimg1 = image1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2]]
+            subimg2 = image2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2]]
+
+            warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+            warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+
+            alpha_blend = (1 - alpha) * warped1 + alpha * warped2
+            newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]]
+            mask[newimg_sq != 0] = 0
+            newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + (alpha_blend * mask)[:newimg_sq.shape[0], :newimg_sq.shape[1]]
+        else:
+            subimg1 = image1[bb1[1]:bb1[1] + bb1[3], bb1[0]:bb1[0] + bb1[2], :]
+            subimg2 = image2[bb2[1]:bb2[1] + bb2[3], bb2[0]:bb2[0] + bb2[2], :]
+
+            warped1 = cv2.warpAffine(subimg1, trans1, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+            warped2 = cv2.warpAffine(subimg2, trans2, (bb_morph[2], bb_morph[3]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+
+            alpha_blend = (1 - alpha) * warped1 + alpha * warped2
+            newimg_sq = newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2], :]
+            mask[newimg_sq[:, :, 0] != 0] = 0
+            for i in range(3):
+                alpha_blend[:, :, i] *= mask
+            newimg[bb_morph[1]:bb_morph[1] + bb_morph[3], bb_morph[0]:bb_morph[0] + bb_morph[2]] = newimg_sq + alpha_blend[:newimg_sq.shape[0], :newimg_sq.shape[1]]
+
+    return newimg
+
+
+if __name__ == "__main__":
+    face1 = io.imread('data/face1.jpg')
+    face2 = io.imread('data/face2.jpg')
+    face1gray = cv2.cvtColor(face1, cv2.COLOR_RGB2GRAY)
+    face2gray = cv2.cvtColor(face2, cv2.COLOR_RGB2GRAY)
+
+    newimg = morph(face1, face2, .5)
+    points = find_points(face1)
+    triangles = find_triangles(face1.shape,points)
+    draw_triangles(face1,triangles,'data/triangles.png')
+    draw_points(face1,points,'data/points.png')
+
+    plt.figure()
+    plt.imshow(newimg)
+    plt.show()
